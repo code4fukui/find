@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<!-- (c)taisukef CC BY  http://fukuno.jig.jp/ -->
+<html>
+<head>
+<meta charset='utf-8'/>
+<title>選挙ポスターを廻れ！(odp)</title>
+<meta property="og:image" content="http://fukuno.jig.jp/2014/findposterchk.jpg">
+<link rel="apple-touch-icon" href="http://fukuno.jig.jp/2014/icon/poster.png"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
+<meta name="format-detection" content="telephone=no">
+<script src="lib/fukuno.js"></script>
+<script>"use strict";
+
+var plog = [
+{ dt: '2015/06/28 09:26:23', id: 121 },
+{ dt: '2015/06/28 09:36:49', id: 76 },
+{ dt: '2015/06/28 09:49:58', id: 125 },
+{ dt: '2015/06/28 09:53:21', id: 36 },
+{ dt: '2015/06/28 09:57:53', id: 0 },
+{ dt: '2015/06/28 10:02:31', id: 39 },
+{ dt: '2015/06/28 10:10:12', id: 43 },
+{ dt: '2015/06/28 10:17:56', id: 60 },
+{ dt: '2015/06/28 10:21:39', id: 30 },
+{ dt: '2015/06/28 10:32:29', id: 130 },
+{ dt: '2015/06/28 10:39:06', id: 96 },
+{ dt: '2015/06/28 10:43:07', id: 128 },
+{ dt: '2015/06/28 10:50:22', id: 90 },
+{ dt: '2015/06/28 10:58:57', id: 25 },
+{ dt: '2015/06/28 11:09:54', id: 93 },
+{ dt: '2015/06/28 11:15:55', id: 104 },
+{ dt: '2015/06/28 11:24:26', id: 114 },
+{ dt: '2015/06/28 11:32:10', id: 102 },
+{ dt: '2015/06/28 11:41:43', id: 61 },
+{ dt: '2015/06/28 11:46:56', id: 28 },
+{ dt: '2015/06/28 12:01:48', id: 47 },
+{ dt: '2015/06/28 12:52:33', id: 115 },
+{ dt: '2015/06/28 13:00:50', id: 59 },
+{ dt: '2015/06/28 13:11:02', id: 72 },
+{ dt: '2015/06/28 13:23:19', id: 120 },
+{ dt: '2015/06/28 13:37:06', id: 124 },
+{ dt: '2015/06/28 13:43:02', id: 105 },
+{ dt: '2015/06/28 13:53:26', id: 40 },
+{ dt: '2015/06/28 14:01:39', id: 12 },
+{ dt: '2015/06/28 14:07:39', id: 97 },
+{ dt: '2015/06/28 14:16:15', id: 109 },
+{ dt: '2015/06/28 14:21:27', id: 18 },
+{ dt: '2015/06/28 14:30:53', id: 11 },
+{ dt: '2015/06/28 14:36:40', id: 7 },
+{ dt: '2015/06/28 14:48:38', id: 89 },
+{ dt: '2015/06/28 14:57:30', id: 82 },
+{ dt: '2015/06/28 15:02:19', id: 1 },
+{ dt: '2015/06/28 15:02:23', id: 1 },
+{ dt: '2015/06/28 15:10:20', id: 19 },
+{ dt: '2015/06/28 15:18:22', id: 113 },
+{ dt: '2015/06/28 15:21:28', id: 86 },
+{ dt: '2015/06/28 15:39:33', id: 123 },
+{ dt: '2015/06/28 15:49:08', id: 54 },
+{ dt: '2015/06/28 15:56:59', id: 88 },
+{ dt: '2015/06/28 16:07:18', id: 35 },
+{ dt: '2015/06/28 16:07:43', id: 127 },
+{ dt: '2015/06/28 16:22:24', id: 77 },
+{ dt: '2015/06/28 16:29:50', id: 46 },
+{ dt: '2015/06/28 16:36:38', id: 122 },
+{ dt: '2015/06/28 16:42:54', id: 26 },
+{ dt: '2015/06/28 16:53:23', id: 48 },
+{ dt: '2015/06/28 17:05:44', id: 29 },
+{ dt: '2015/06/28 17:14:07', id: 84 },
+{ dt: '2015/06/28 17:22:35', id: 71 },
+{ dt: '2015/06/28 17:22:36', id: 71 },
+{ dt: '2015/06/28 17:30:37', id: 52 },
+{ dt: '2015/06/28 17:40:28', id: 112 },
+{ dt: '2015/06/28 18:04:41', id: 110 },
+{ dt: '2015/06/28 18:37:07', id: 42 },
+{ dt: '2015/06/28 18:51:22', id: 21 },
+{ dt: '2015/06/28 19:01:15', id: 31 },
+{ dt: '2015/06/28 19:13:39', id: 79 },
+{ dt: '2015/06/28 19:18:42', id: 22 },
+{ dt: '2015/06/28 19:23:29', id: 117 },
+{ dt: '2015/06/28 19:29:10', id: 73 },
+
+{ dt: '2015/06/29 06:45:57', id: 49 },
+{ dt: '2015/06/29 06:50:40', id: 119 },
+{ dt: '2015/06/29 07:02:20', id: 2 },
+{ dt: '2015/06/29 07:08:11', id: 23 },
+{ dt: '2015/06/29 07:13:20', id: 55 },
+{ dt: '2015/06/29 07:21:41', id: 27 },
+{ dt: '2015/06/29 07:30:06', id: 101 },
+{ dt: '2015/06/29 07:42:12', id: 56 },
+{ dt: '2015/06/29 07:51:39', id: 33 },
+{ dt: '2015/06/29 07:57:20', id: 62 },
+{ dt: '2015/06/29 08:14:47', id: 37 },
+{ dt: '2015/06/29 08:25:54', id: 50 },
+{ dt: '2015/06/29 08:45:18', id: 45 },
+{ dt: '2015/06/29 08:54:08', id: 74 },
+{ dt: '2015/06/29 09:00:53', id: 92 },
+{ dt: '2015/06/29 09:11:58', id: 103 },
+{ dt: '2015/06/29 09:44:24', id: 17 },
+{ dt: '2015/06/29 09:44:25', id: 17 },
+{ dt: '2015/06/29 09:55:57', id: 118 },
+{ dt: '2015/06/29 10:08:32', id: 3 },
+{ dt: '2015/06/29 10:27:09', id: 64 },
+{ dt: '2015/06/29 10:27:11', id: 64 },
+{ dt: '2015/06/29 10:32:58', id: 107 },
+{ dt: '2015/06/29 10:40:48', id: 87 },
+{ dt: '2015/06/29 10:50:02', id: 4 },
+{ dt: '2015/06/29 11:00:07', id: 58 },
+{ dt: '2015/06/29 11:10:34', id: 44 },
+{ dt: '2015/06/29 11:31:54', id: 75 },
+{ dt: '2015/06/29 11:40:32', id: 53 },
+{ dt: '2015/06/29 13:06:55', id: 69 },
+{ dt: '2015/06/29 13:14:34', id: 68 },
+{ dt: '2015/06/29 13:23:19', id: 14 },
+{ dt: '2015/06/29 13:29:12', id: 67 },
+{ dt: '2015/06/29 13:35:42', id: 38 },
+{ dt: '2015/06/29 13:38:53', id: 100 },
+{ dt: '2015/06/29 13:45:21', id: 98 },
+{ dt: '2015/06/29 13:57:16', id: 34 },
+{ dt: '2015/06/29 14:11:07', id: 91 },
+{ dt: '2015/06/29 14:19:29', id: 99 },
+{ dt: '2015/06/29 14:35:46', id: 41 },
+{ dt: '2015/06/29 14:43:21', id: 94 },
+{ dt: '2015/06/29 15:03:20', id: 66 },
+{ dt: '2015/06/29 15:03:21', id: 66 },
+{ dt: '2015/06/29 15:09:42', id: 116 },
+{ dt: '2015/06/29 15:20:02', id: 111 },
+{ dt: '2015/06/29 15:25:34', id: 126 },
+{ dt: '2015/06/29 15:32:34', id: 24 },
+{ dt: '2015/06/29 15:37:54', id: 20 },
+{ dt: '2015/06/29 15:44:15', id: 8 },
+{ dt: '2015/06/29 15:49:44', id: 13 },
+{ dt: '2015/06/29 15:56:08', id: 63 },
+{ dt: '2015/06/29 16:14:47', id: 6 },
+{ dt: '2015/06/29 16:22:28', id: 15 },
+{ dt: '2015/06/29 16:28:36', id: 65 },
+{ dt: '2015/06/29 16:33:06', id: 108 },
+{ dt: '2015/06/29 16:36:48', id: 16 },
+{ dt: '2015/06/29 16:40:47', id: 95 },
+{ dt: '2015/06/29 16:46:31', id: 80 },
+{ dt: '2015/06/29 16:51:23', id: 78 },
+{ dt: '2015/06/29 16:56:31', id: 10 },
+{ dt: '2015/06/29 17:02:34', id: 70 },
+{ dt: '2015/06/29 17:14:24', id: 9 },
+{ dt: '2015/06/29 17:24:49', id: 106 },
+{ dt: '2015/06/29 17:31:03', id: 81 },
+{ dt: '2015/06/29 17:40:02', id: 57 },
+{ dt: '2015/06/29 17:49:22', id: 51 },
+{ dt: '2015/06/29 17:57:22', id: 83 },
+{ dt: '2015/06/29 18:16:04', id: 32 },
+{ dt: '2015/06/29 18:25:27', id: 129 },
+{ dt: '2015/06/29 18:36:52', id: 5 },
+{ dt: '2015/06/29 18:42:23', id: 85 },
+{ dt: '2015/06/29 18:42:24', id: 85 },
+];
+
+var DEFAULT_ORG;
+
+var watchid;
+var map;
+var supportgps = typeof navigator.geolocation != 'undefined';
+
+var getLL = function(lat, lng) {
+	return new google.maps.LatLng(lat, lng);
+};
+var showNearest = function() {
+	if (supportgps)
+		dir();
+	else
+		setPosition(DEFAULT_ORG, 5);
+};
+
+var TYPE = [
+	"http://odp.jig.jp/odp/1.0#PosterPlace",
+//	"http://odp.jig.jp/odp/1.0#Polls",
+];
+
+var HOW_FAR_DEG_FROM_HEAR = 0.2; // 0.01;
+
+var icons = {
+// "http://odp.jig.jp/odp/1.0#PosterPlace": { icon: "icon/poster.png", name: "投票ポスター" },
+ "http://odp.jig.jp/odp/1.0#PosterPlace": { icon: "icon/poster-mini.png", name: "投票ポスター" },
+ "http://odp.jig.jp/odp/1.0#Polls": { icon: "icon/polls.png", name: "投票所" },
+ "http://purl.org/jrrk#CivicFacility": { icon: "icon_facility.png", name: "施設" },
+"http://purl.org/jrrk#EmergencyFacility": { icon: "icon_emergency.png", name: "避難所" },
+//http://purl.org/jrrk#temporaryGatheringLocation
+ "http://purl.org/jrrk#FarmersMarket": { icon: "icon_tomato.png", name: "農産物直売所" },
+//http://purl.org/jrrk#RoadConstruction
+ "http://purl.org/jrrk#AED": { icon: "icon_aed.png", name: "AED設置場所" },
+ "http://purl.org/jrrk#PublicToilet": { icon: "icon_toilet.png", name: "公衆トイレ" },
+ "http://purl.org/jrrk#Hydrant": { icon: "icon_hydrant.png", name: "消火栓" },
+//  http://purl.org/jrrk#CivicPOI
+//http://purl.org/jrrk#RequiringAssistanceAuthorizedUsersFacilityDisaster
+ "http://purl.org/jrrk#MedicalInstitute": { icon: "icon_clinic.png", name: "病院" },
+};
+
+/*
+translated by
+http://webtranslation.paralink.com/translator/default.asp
+*/
+var CAP = {
+	ja: [ "最短", "避難所を探す" ],
+	en: [ "nearest", "find a refuge" ],
+	zh: [ "最近", "找到避难所" ],
+	ko: [ "가장 가까운", "피난처를 찾아" ],
+	de: [ "nächste", "finden Sie einen Unterschlupf" ],
+	ca: [ "més proper", "trobar un refugi" ],
+	pt: [ "quase", "finden Sie einen Unterschlupf" ],
+	tl: [ "kalapitan", "makahanap ng isang magkubli" ],
+	fa: [ "نزديكترين", "نزديكترين" ]
+};
+var lang = function(s, loadapi) {
+//debug(s);
+	var v = CAP[s];
+	if (v == null)
+		v = CAP["en"];
+	get("btnf").textContent = v[0];
+//	document.title = v[1];
+	
+	if (loadapi !== false) {
+		document.location.hash = "#" + s;
+		document.location.reload();
+	}
+};
+window.onload = function() {
+	init();
+};
+var init = function() {
+	if (google == null || google.maps == null || google.maps.LatLng == null) {
+		setTimeout(init, 100);
+		return;
+	}
+
+	lang(getLanguage2(), false);
+
+	DEFAULT_ORG = new google.maps.LatLng(35.943187,136.188701); // 鯖江駅
+//	DEFAULT_ORG = new google.maps.LatLng(35.903304,136.170836); // 武生駅
+//	DEFAULT_ORG = new google.maps.LatLng(35.012564,135.767959); // 京都
+//	DEFAULT_ORG = new google.maps.LatLng(35.173887,138.906723); // 裾野市
+	
+	
+	map = new google.maps.Map(get("map"), {
+		center: new google.maps.LatLng(36.208823, 138.251953),
+		zoom: 5,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+//		mapTypeId: google.maps.MapTypeId.HYBRID
+	});
+	
+	
+	get('btnp').onclick = function() {
+		if (dislist == null)
+			return;
+		if (currentdislist > 0) {
+			currentdislist--;
+			navigate(dislist[currentdislist].marker);
+		}
+	};
+	get('btnn').onclick = function() {
+		if (dislist == null)
+			return;
+		if (currentdislist < dislist.length - 1) {
+			currentdislist++;
+			navigate(dislist[currentdislist].marker);
+		}
+	};
+	get('btnf').onclick = function() {
+		if (dislist == null) {
+			showNearest();
+			return;
+		}
+		currentdislist = 0;
+		navigate(dislist[currentdislist].marker);
+	};
+	
+	markers = [];
+	bounds = new google.maps.LatLngBounds();
+	
+	showNearest();
+};
+var markers;
+var bounds;
+var makeMarkerItem = function(d) {
+	var lat = d.latitude || d.lat;
+	var lng = d.longitude || d.lng;
+	var ll = new google.maps.LatLng(lat, lng);
+	d.pos = ll;
+	bounds.extend(ll);
+	var marker = makeMarker(map, ll, d);
+	markers.push(marker);
+	marker.data = d;
+	google.maps.event.addListener(marker, "click", function(e) {
+		openInfo(this);
+	});
+	
+	/*
+	var div = create('div');
+	div.textContent = d.name;
+	div.data = d;
+	div.marker = marker;
+	div.onclick = function(e) {
+//		selected(e.srcElement);
+		var d = this.data;
+		var lat = d.latitude || d.lat;
+		var lng = d.longitude || d.lng;
+		map.setCenter(new google.maps.LatLng(lat, lng));
+		map.setZoom(17);
+		openInfo(e.srcElement.marker);
+	};
+	get('list').appendChild(div);
+	*/
+};
+var clearMarkers = function() {
+	for (var i = 0; i < markers.length; i++) {
+		markers[i].setMap(null);
+	}
+};
+
+var loadRefuge = function(ll, funcnext) {
+	for (var i = 0; i < TYPE.length; i++) {
+		loadRefuge2(TYPE[i], ll, i == 0 ? funcnext : null);
+	}
+};
+var loadRefuge2 = function(type, ll, funcnext) {
+//	currentpos = ll = getLL(35.903508,136.168782);
+
+	clearMarkers();
+	
+	// google.maps.event.addListener(map, "idle", function() {
+	/*
+	var b = map.getBounds();
+	if (!b)
+		return;
+	var latmin = b.getNorthEast().lat();
+	var lngmin = b.getNorthEast().lng();
+	var latmax = b.getSouthWest().lat();
+	var lngmax = b.getSouthWest().lng();
+	alert(latmin + " " + lngmin + " " + latmax + " " + lngmax);
+	*/
+	var dll = HOW_FAR_DEG_FROM_HEAR;
+	var lat = ll.lat();
+	var lng = ll.lng();
+	var latmin = lat - dll;
+	var latmax = lat + dll;
+	var lngmin = lng - dll;
+	var lngmax = lng + dll;
+	
+//	return;
+
+/*
+ "http://purl.org/jrrk#CivicFacility": { icon: "icon_facility.png", name: "施設" },
+"http://purl.org/jrrk#EmergencyFacility": { icon: "icon_emergency.png", name: "避難所" },
+//http://purl.org/jrrk#temporaryGatheringLocation
+ "http://purl.org/jrrk#FarmersMarket": { icon: "icon_tomato.png", name: "農産物直売所" },
+//http://purl.org/jrrk#RoadConstruction
+ "http://purl.org/jrrk#AED": { icon: "icon_aed.png", name: "AED設置場所" },
+ "http://purl.org/jrrk#PublicToilet": { icon: "icon_toilet.png", name: "公衆トイレ" },
+ "http://purl.org/jrrk#Hydrant": { icon: "icon_hydrant.png", name: "消火栓" },
+//  http://purl.org/jrrk#CivicPOI
+//http://purl.org/jrrk#RequiringAssistanceAuthorizedUsersFacilityDisaster
+ "http://purl.org/jrrk#MedicalInstitute": { icon: "icon_clinic.png", name: "病院" },
+*/	
+	var q =
+		"PREFIX jrrk: <http://purl.org/jrrk#>\n" +
+		"PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" +
+		"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+		"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+		"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+		"select ?s ?name ?lat ?lng {\n" + 
+		"?s rdf:type <" + type + ">;\n" +
+		"geo:lat ?lat;\n" +
+		"geo:long ?lng.\n" +
+		"optional{ ?s jrrk:location ?name.}\n" +
+		" filter(xsd:float(?lat) < " + latmax + " && xsd:float(?lat) > " + latmin + " && xsd:float(?lng) < " + lngmax + " && xsd:float(?lng) > " + lngmin + ")" +
+		"}";
+//alert(lat + " " + lng);
+	var baseurl = "http://sparql.odp.jig.jp/data/sparql";
+	var url = baseurl + "?query=" + encodeURIComponent(q) + "&output=json";
+	var func = function(data) {
+//		dump(data);
+		var items = data.results.bindings;
+		
+		bounds = new google.maps.LatLngBounds();
+		for (var i = 0; i < items.length; i++) {
+			var it = items[i];
+			it.type = { value: type };
+//			if (!icons[it.type.value])
+//				continue;
+			var d = {
+//				url: it.url.value,
+				type: it.type.value,
+				name: it.name ? it.name.value : "",
+				lat: it.lat.value,
+				lng: it.lng.value
+			};
+			makeMarkerItem(d);
+		}
+		if (data.length > 0)
+			map.fitBounds(bounds);
+		
+		funcnext();
+	};
+	url += "&callback=" + getCallbackMethod(func);
+	jsonp(url);
+//	window.getdata = func;
+//	jsonp("testjson2.js");
+};
+
+var getNearPosition = function(lat, lng) {
+	if (markers == null)
+		return null;
+	var len = 100000000; // 100,000,000m
+	var n = -1;
+	for (var i = 0; i < markers.length; i++) {
+		var m = markers[i];
+		var p = m.getPosition();
+		var d = getDistance(lat, lng, p.lat(), p.lng());
+		if (d < len) {
+			len = d;
+			n = i;
+		}
+	}
+	if (n < 0)
+		return null;
+	get('info').innerHTML = getContent(markers[n].data);
+	return markers[n].getPosition();
+};
+var dislist;
+var currentdislist;
+var calcDistanceList = function(lat, lng) {
+	if (markers == null)
+		return false;
+	var len = 100000000; // 100,000,000m
+	dislist = [];
+	for (var i = 0; i < markers.length; i++) {
+		var m = markers[i];
+		var p = m.getPosition();
+		var d = getDistance(lat, lng, p.lat(), p.lng());
+		dislist[i] = { marker: m, distance: d };
+	}
+	for (var i = 0; i < dislist.length - 1; i++) {
+		for (var j = i; j < dislist.length; j++) {
+			if (dislist[i].distance > dislist[j].distance) {
+				var tmp = dislist[i];
+				dislist[i] = dislist[j];
+				dislist[j] = tmp;
+			}
+		}
+	}
+	return true;
+};
+var navigate = function(marker) {
+	get('info').innerHTML = getContent(marker.data);
+	directions(currentpos, marker.getPosition());
+	openInfo(marker);
+};
+var getDistance = function(lat1, lng1, lat2, lng2) {
+	var dlat = (lat2 - lat1) * Math.PI / 180;
+	var dlng = (lng2 - lng1) * Math.PI / 180;
+	var a = Math.sin(dlat / 2) * Math.sin(dlat / 2)
+		+ Math.cos(lat1 * Math.PI / 180)
+		* Math.cos(lat2 * Math.PI / 180)
+		* Math.sin(dlng / 2) * Math.sin(dlng / 2);
+	return 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 6371; // 6371 = R of the Earth in km
+};
+var jptel = function(tel) {
+	if (tel.startsWith("+81-")) {
+		return "0" + tel.substring(4);
+	}
+	return tel;
+};
+var getName = function(data) {
+	var lang = getLanguage2();
+	var s = data.name;
+	if (lang != "ja" && lang != "zh" && data.nameen != null && data.nameen != "null")
+		s = data.nameen;
+	var n = s.lastIndexOf("@@");
+	if (n > 0)
+		s = s.substring(0, n);
+	return s;
+};
+var updateIndicator = function() {
+	var sum = [];
+	for (var i = 0; i < 7; i++)
+		sum[i] = 0;
+	for (var i = 0; i < markers.length; i++) {
+		var ni = markers[i].ni;
+		if (!ni)
+			ni = 0;
+		sum[ni]++;
+	}
+	var s = "";
+	for (var i = 0; i < sum.length; i++) {
+		s += "<img src=icon/poster-mini-" + i + ".png width=16 height=16> " + sum[i] + "&nbsp;&nbsp;";
+	}
+	s += " / " + markers.length;
+	get("ind").innerHTML = s;
+};
+var tid;
+var firstIndicator = function() {
+	tid = localStorage["findposterchk-tid"];
+	if (!tid) {
+		tid = Math.random();
+		localStorage["findposterchk-tid"] = tid;
+	}
+	var s = "";
+	for (var i = 0; i < markers.length; i++) {
+		var m = markers[i];
+		m.id = i;
+		var n = localStorage["findposterchk-" + i];
+		if (!n) {
+			n = 0;
+		}
+		// plog
+		n = 1; // 灰色
+		var pl = null;
+		for (var j = 0; j < plog.length; j++) {
+			if (plog[j].id == m.id) {
+				pl = plog[j];
+				n = 2;
+				break;
+			}
+		}
+		
+		m.setIcon("icon/poster-mini-" + n + ".png");
+		m.ni = n;
+		
+		if (pl) {
+//			s += m.id + "\t" + pl.dt + "\t" + getName(m.data) + "\t" + m.data.latitude + "\t" + m.data.longitude + "\n";
+			s += m.id + "\t" + pl.dt + "\t" + getName(m.data) + "\thttp://maps.google.com/?ll=" + m.data.lat + "," + m.data.lng + "\n";
+		}
+	}
+	prompt(s);
+};
+var btn = function(n) {
+	map.info.marker.setIcon("icon/poster-mini-" + n + ".png");
+	map.info.marker.ni = n;
+	localStorage["findposterchk-" + map.info.marker.id] = n;
+	updateIndicator();
+	jsonp("http://sabae.cc/log/?name=posterchk&tid=" + tid + "&id=" + map.info.marker.id + "&n=" + n);
+};
+var getContent = function(data) {
+	var pos = data.pos;
+	var mapurl = "http://maps.google.co.jp/maps?ll=" + pos.lat() + "," + pos.lng();
+	var s = [];
+	s.push("<div id='data'>");
+	
+	s.push("<div>" + icons[data.type].name + "</div>");
+	s.push("<div id='title'>" + getName(data) + "</div>");
+/*	s.push(data.address + "<br>"); */
+	s.push("MAP <a href='" + mapurl + "' target=_blank>" + pos.lat() + "," + pos.lng() + "</a><br>");
+	s.push("<br>");
+	for (var i = 0; i < 7; i++) {
+		s.push("<a href=javascript:btn(" + i + ")><img src=icon/poster-mini-" + i + ".png></a>");
+	}
+
+
+	
+//	s.push("DATA <a href='" + data.url + "' target=_blank>" + data.url + "</a><br>");
+	s.push("</div>");
+	return s.join('');
+};
+var makeMarker = function(map, pos, data) {
+	var opb = [ "A", "ff3300" ];
+	var op = opb;
+	return new google.maps.Marker({
+		position: pos,
+		map: map,
+		draggable: false,
+//		animation: google.maps.Animation.DROP,
+//		icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=' + op[0] + '|' + op[1] + '|000000'
+//		icon: 'icon-heart32x32.png' // アイコン下中央がデフォルトっぽい
+		icon: new google.maps.MarkerImage(
+			//'icon/icon-exit2.png',
+			icons[data.type].icon // ,
+/*			new google.maps.Size(32, 32),
+			new google.maps.Point(0, 0),
+			new google.maps.Point(16, 16),
+			new google.maps.Size(32, 32)
+*/		)
+/*
+		icon: new google.maps.MarkerImage(
+			'icon-heart.png',
+			new google.maps.Size(32, 32),
+			new google.maps.Point(0, 0),
+			new google.maps.Point(16, 16)
+		)
+*/
+	});
+};
+var openInfo = function(marker) {
+	if (map.info != null) {
+		map.info.close();
+		if (map.info.marker == marker) {
+			map.info = null;
+			return;
+		}
+	}
+	map.info = new google.maps.InfoWindow({
+		content: getContent(marker.data),
+//		position: marker.pos,
+//		pixelOffset: new google.maps.Size(-40, 20)
+	});
+	google.maps.event.addListener(map.info, "closeclick", function() {
+		map.info = null;
+	});
+	map.info.marker = marker;
+	map.info.open(map, marker);
+};
+var currentpos;
+var findNear = function() {
+	/*
+	var near = getNearPosition(currentpos.lat(), currentpos.lng());
+	if (near == null)
+		setTimeout(findNear, 100);
+	else
+		directions(currentpos, near);
+	*/
+	var b = calcDistanceList(currentpos.lat(), currentpos.lng());
+	if (!b)
+		setTimeout(findNear, 100);
+	else {
+		if (dislist.length > 0) {
+			currentdislist = 0;
+			navigate(dislist[currentdislist].marker);
+		}
+	}
+};
+var setPosition = function(ll, accuracy) {
+	map.setCenter(ll);
+	map.setZoom(19);
+	
+	new google.maps.Circle({
+		map: map,
+		center: ll,
+		fillColor: "#3333ff",
+		fillOpacity: .2,
+		strokeWeight: 0,
+//		strokeColor: "#3333ff",
+//		strokeOpacity: 1,
+//		strokeWeight: 2,
+		radius: accuracy
+	});
+	
+	currentpos = ll;
+	
+	loadRefuge(ll, function() {
+		findNear();
+		
+//		get("ind").innerHTML = 0 + "/" + markers.length;
+		firstIndicator();
+		updateIndicator();
+	});
+}
+var dir = function() {
+	if (watchid != null) {
+		navigator.geolocation.clearWatch(watchid);
+	}
+	watchid = navigator.geolocation.watchPosition(function(p) {
+		navigator.geolocation.clearWatch(watchid);
+		watchid = null;
+		var lat = p.coords.latitude;
+		var lng = p.coords.longitude;
+		var ll = getLL(lat, lng);
+		setPosition(ll, p.coords.accuracy);
+	}, function(e) {
+		setPosition(DEFAULT_ORG, 5);
+		alert("現在位置を取得できませんでした。GPSなどがONになっているかご確認ください。\ncheck GPS settings");
+	}, {
+		maximumAge: 30000,
+		enableHighAccuracy: 1
+	});
+};
+var directionsRenderer;
+var directions = function(org, dest) {
+	if (directionsRenderer != null) {
+		directionsRenderer.setMap(null);
+		directionsRenderer.setPanel(null);
+	}
+	directionsRenderer = new google.maps.DirectionsRenderer();
+//	directionsRenderer.setMap(map);
+	directionsRenderer.setPanel(get('route'));
+	var dirs = new google.maps.DirectionsService();
+	var request = {
+		origin: org,
+		destination: dest,
+		travelMode: google.maps.DirectionsTravelMode.WALKING, // BICYCLING, DRIVING, WALKING
+		unitSystem: google.maps.DirectionsUnitSystem.METRIC,
+		provideRouteAlternatives: false // 替わりの道
+	};
+	dirs.route(request, function(response, status) {
+		if (status == google.maps.DirectionsStatus.OK) {
+			directionsRenderer.setDirections(response);
+		} else {
+			get('route').textContent = "ルート探索に失敗しました";
+		}
+	});
+}
+
+var parseInt2 = function(n) {
+	var n = parseInt(n);
+	if (isNaN(n))
+		return "-";
+	return n;
+};
+var xml2json = function(url, callback) {
+//	var host = "fukuno.jig.jp";
+//	var host = "localhost:8080";
+	var host = "sabae.cc";
+	var base = "http://" + host + "/proxy/ITqT5WkhCf2yn1s9?cnv=xml2json";
+	var url2 = base + "&cache=no&callback=" + getCallbackMethod(callback) + "&url=" + encodeURI(url);
+	jsonp(url2);
+};
+var jsonp = function(url) {
+	var head = document.getElementsByTagName("head")[0];
+   	var script = document.createElement("script");
+    script.setAttribute("src", url);
+    script.setAttribute("type", "text/javascript");
+//	script.setAttribute("id", 'jsonp');
+	head.appendChild(script);
+};
+
+var getLanguage2 = function() {
+	var lang = getLanguage();
+	var hash = document.location.hash;
+	if (hash.length > 2) {
+		lang = hash.substring(1);
+	}
+	return lang;
+};
+var loadLocalAPI = function() {
+	var apiurl = "http://maps.google.com/maps/api/js?sensor=true&language=" + getLanguage2();
+	document.write('<' + 'script src="' + apiurl + '"' + ' type="text/javascript"><' + '/script>');
+};
+loadLocalAPI();
+
+</script>
+<style>
+body {
+	margin: 0px;
+	text-align: center;
+	box-sizing: border-box; /* width include border */
+	-webkit-text-size-adjust: none; /* for iPhone */
+}
+#map {
+	width: 100%;
+	height: 620px;
+}
+#debug {
+	text-align: left;
+}
+#route {
+}
+#info {
+	text-align: center;
+}
+#data {
+	text-align: left;
+	word-wrap: break-word;
+}
+#data #title {
+	font-size: 120%;
+	font-weight: bold;
+	margin: 0px;
+}
+.nbtn {
+	font-size: 14px;
+	line-height: 24px;
+	height: 30px;
+	width: 90px;
+	border: none;
+	margin: 4px;
+	background-color: #afb;
+}
+#tname {
+	font-size: 20px;
+	padding-left: 14px;
+}
+.src {
+	margin: 1em;
+	font-size: 80%;
+}
+.langs {
+	margin: 10px 0px 10px 0px;
+}
+.langs a {
+	color: gray !important;
+	text-decoration: none;
+	font-size: 80%;
+}
+#credit a {
+	color: gray !important;
+	text-decoration: none;
+	font-size: 80%;
+	margin: 1em;
+}
+
+</style>
+</head>
+<body>
+
+<div id='main'>
+
+<div id='navi'>
+<div id='map'></div>
+<button class='nbtn' id='btnp'>&lt;&lt;</button>
+<button class='nbtn' id='btnf'>最短</button>
+<button class='nbtn' id='btnn'>&gt;&gt;</button>
+<div id="ind"></div>
+</div>
+<div id="info"></div>
+</div>
+
+<div id="route"></div>
+
+
+</div>
+
+<div class="src">
+DATA: CC BY <a href=http://sparql.odp.jig.jp/ target=_blank>odp SPARQL Endpoint</a><br>
+APP: CC BY <a href=http://fukuno.jig.jp/986 target=_blank>福野泰介の一日一創</a>
+</div>
+
+<!--
+<div class="langs">
+<a href=javascript:lang("ja")>日本語</a>,
+<a href=javascript:lang("zh")>中国語</a>,
+<a href=javascript:lang("ko")>한국어</a>,
+<a href=javascript:lang("en")>English</a>,
+<a href=javascript:lang("tl")>Tagalog</a>,
+<a href=javascript:lang("pt")>Português</a>,
+<a href=javascript:lang("de")>Deutsch</a>,
+<a href=javascript:lang("ca")>català</a>
+<a href=javascript:lang("fa")>فارسى‎</a>
+</div>
+-->
+
+
+</body>
+</html>

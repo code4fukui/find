@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<!-- (c)taisukef CC BY-NC-SA  http://fukuno.jig.jp/ -->
+<html>
+<head>
+<meta charset='utf-8'/>
+<title>findrefuge</title>
+<meta property="og:image" content="http://fukuno.jig.jp/2012/findrefuge.jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
+<meta name="format-detection" content="telephone=no">
+<script src="https://www.google.com/jsapi"></script>
+<script src="http://maps.google.com/maps/api/js?sensor=true&language=ja"></script>
+<script src='util.js'></script>
+<script src='help2.js'></script>
+<script src="geo3x3.js"></script>
+<script>
+
+var DEFAULT_ORG;
+
+var watchid;
+var map;
+var supportgps = typeof navigator.geolocation != 'undefined';
+
+getLL = function(lat, lng) {
+	return new google.maps.LatLng(lat, lng);
+};
+onload = function() {
+	DEFAULT_ORG = new google.maps.LatLng(35.943187,136.188701); // 鯖江駅
+	
+	map = new google.maps.Map($("map"), {
+		center: new google.maps.LatLng(36.208823, 138.251953),
+		zoom: 5,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+//		mapTypeId: google.maps.MapTypeId.HYBRID
+	});
+	
+	var url = "http://www3.city.sabae.fukui.jp/refuge/refuge1.xml";
+	xml2json(url, "ret");
+	
+	if (supportgps)
+		dir();
+	else
+		setPosition(DEFAULT_ORG, 5);
+	
+	$('btnp').onclick = function() {
+		if (dislist == null)
+			return;
+		if (currentdislist > 0) {
+			currentdislist--;
+			navigate(dislist[currentdislist].marker);
+		}
+	};
+	$('btnn').onclick = function() {
+		if (dislist == null)
+			return;
+		if (currentdislist < dislist.length - 1) {
+			currentdislist++;
+			navigate(dislist[currentdislist].marker);
+		}
+	};
+	$('btnf').onclick = function() {
+		if (dislist == null)
+			return;
+		currentdislist = 0;
+		navigate(dislist[currentdislist].marker);
+	};
+}
+var markers;
+var ret = function(data) {
+	markers = [];
+	var bounds = new google.maps.LatLngBounds();
+	data = data.dataroot.refuge;
+	for (var i = 0; i < data.length; i++) {
+		var d = data[i];
+		
+		var ll = new google.maps.LatLng(d.latitude, d.longitude);
+		d.pos = ll;
+		bounds.extend(ll);
+		var marker = makeMarker(map, ll, d);
+		markers.push(marker);
+		marker.data = d;
+		google.maps.event.addListener(marker, "click", function(e) {
+			openInfo(this);
+		});
+		
+		var div = create('div');
+		div.textContent = d.name;
+		div.data = d;
+		div.marker = marker;
+		div.onclick = function(e) {
+	//		selected(e.srcElement);
+			var d = this.data;
+			map.setCenter(new google.maps.LatLng(d.latitude, d.longitude));
+			map.setZoom(17);
+			openInfo(e.srcElement.marker);
+		};
+		$('list').appendChild(div);
+	}
+	map.fitBounds(bounds);
+};
+var getNearPosition = function(lat, lng) {
+	if (markers == null)
+		return null;
+	var len = 100000000; // 100,000,000m
+	var n = -1;
+	for (var i = 0; i < markers.length; i++) {
+		var m = markers[i];
+		var p = m.getPosition();
+		var d = getDistance(lat, lng, p.lat(), p.lng());
+		if (d < len) {
+			len = d;
+			n = i;
+		}
+	}
+	if (n < 0)
+		return null;
+	$('info').innerHTML = getContent(markers[n].data);
+	return markers[n].getPosition();
+};
+var dislist;
+var currentdislist;
+var calcDistanceList = function(lat, lng) {
+	if (markers == null)
+		return false;
+	var len = 100000000; // 100,000,000m
+	dislist = [];
+	for (var i = 0; i < markers.length; i++) {
+		var m = markers[i];
+		var p = m.getPosition();
+		var d = getDistance(lat, lng, p.lat(), p.lng());
+		dislist[i] = { marker: m, distance: d };
+	}
+	for (var i = 0; i < dislist.length - 1; i++) {
+		for (var j = i; j < dislist.length; j++) {
+			if (dislist[i].distance > dislist[j].distance) {
+				var tmp = dislist[i];
+				dislist[i] = dislist[j];
+				dislist[j] = tmp;
+			}
+		}
+	}
+	return true;
+};
+var navigate = function(marker) {
+	$('info').innerHTML = getContent(marker.data);
+	directions(currentpos, marker.getPosition());
+};
+var getDistance = function(lat1, lng1, lat2, lng2) {
+	var dlat = (lat2 - lat1) * Math.PI / 180;
+	var dlng = (lng2 - lng1) * Math.PI / 180;
+	var a = Math.sin(dlat / 2) * Math.sin(dlat / 2)
+		+ Math.cos(lat1 * Math.PI / 180)
+		* Math.cos(lat2 * Math.PI / 180)
+		* Math.sin(dlng / 2) * Math.sin(dlng / 2);
+	return 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 6371; // 6371 = R of the Earth in km
+};
+var jptel = function(tel) {
+	if (tel != null && tel.startsWith("+81-")) {
+		return "0" + tel.substring(4);
+	}
+	return tel;
+}
+var getContent = function(data) {
+	var pos = data.pos;
+	var level = 13; // 
+	var zone = Geo3x3.encode(pos.lat(), pos.lng(), level);
+	var geourl = "http://fukuno.jig.jp/2012/geo3x3#" + zone;
+	var mapurl = "http://maps.google.co.jp/maps?ll=" + pos.lat() + "," + pos.lng();
+	var s = [];
+	s.push("<div id='data'>");
+	s.push("<div id='title'>" + data.name + "</div>");
+	s.push("No." + data.no + " - " + data.area + "<br>");
+	s.push(data.type + "<br>");
+	s.push(data.address + "<br>");
+	s.push("<a href='tel:" + jptel(data.tel) + "'>" + jptel(data.tel) + "</a><br>");
+	s.push("地図 <a href='" + geourl + "' target=_blank>geo3x3:" + zone + "</a><br>");
+	s.push("</div>");
+	return s.join('');
+};
+var makeMarker = function(map, pos, data) {
+	var opb = [
+		[ "R", "ff3300" ],
+	];
+	var op = opb[0];
+	return new google.maps.Marker({
+		position: pos,
+		map: map,
+		draggable: false,
+//		animation: google.maps.Animation.DROP,
+		icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=' + op[0] + '|' + op[1] + '|000000'
+	});
+};
+openInfo = function(marker) {
+	if (map.info != null) {
+		map.info.close();
+		if (map.info.marker == marker) {
+			map.info = null;
+			return;
+		}
+	}
+	map.info = new google.maps.InfoWindow({
+	    content: getContent(marker.data)
+	});
+	google.maps.event.addListener(map.info, "closeclick", function() {
+		map.info = null;
+	});
+	map.info.marker = marker;
+	map.info.open(map, marker);
+};
+var currentpos;
+var findNear = function() {
+	/*
+	var near = getNearPosition(currentpos.lat(), currentpos.lng());
+	if (near == null)
+		setTimeout(findNear, 100);
+	else
+		directions(currentpos, near);
+	*/
+	var b = calcDistanceList(currentpos.lat(), currentpos.lng());
+	if (!b)
+		setTimeout(findNear, 100);
+	else {
+		currentdislist = 0;
+		navigate(dislist[currentdislist].marker);
+	}
+};
+var setPosition = function(ll, accuracy) {
+	map.setCenter(ll);
+	map.setZoom(19);
+	
+	new google.maps.Circle({
+		map: map,
+		center: ll,
+		fillColor: "#3333ff",
+		fillOpacity: .2,
+		strokeWeight: 0,
+//		strokeColor: "#3333ff",
+//		strokeOpacity: 1,
+//		strokeWeight: 2,
+		radius: accuracy
+	});
+	
+	currentpos = ll;
+	findNear();
+}
+var dir = function() {
+	watchid = navigator.geolocation.watchPosition(
+		function(pos) { // success
+			navigator.geolocation.clearWatch(watchid);
+		/*
+			if (pos.coords.accuracy >= 300) {
+				return;
+			}
+			*/
+			
+			/* geolocation
+			http://dev.w3.org/geo/api/spec-source.html
+				coords (Coordinates)
+					accuracy: 30 // [m] >0
+					altitude: null // [m]
+					altitudeAccuracy: null  // [m] >0
+					heading: null // degree (0<=heading<360)
+					latitude: 35.9426569
+					longitude: 136.198745
+					speed: null // [m/sec]
+				timestamp (long)
+			*/
+			var lat = pos.coords.latitude;
+			var lng = pos.coords.longitude;
+//			alert(lat + " " + lng + " " + pos.coords.accuracy);
+			var ll = getLL(lat, lng);
+			
+			setPosition(ll, pos.coords.accuracy);
+		},
+		function(e) { // error
+			/*
+				code
+					const unsigned short PERMISSION_DENIED = 1;
+				    const unsigned short POSITION_UNAVAILABLE = 2;
+				    const unsigned short TIMEOUT = 3;
+			    readonly attribute unsigned short code;
+			    readonly attribute DOMString message;
+			*/
+			//alert("err: " + e.message);
+			alert("現在位置が取得できませんでした");
+			setPosition(DEFAULT_ORG, 5);
+		}
+	);
+}
+var directionsRenderer;
+directions = function(org, dest) {
+	if (directionsRenderer != null) {
+		directionsRenderer.setMap(null);
+		directionsRenderer.setPanel(null);
+	}
+	directionsRenderer = new google.maps.DirectionsRenderer();
+	directionsRenderer.setMap(map);
+	directionsRenderer.setPanel($('route'));
+	var dirs = new google.maps.DirectionsService();
+	var request = {
+		origin: org,
+		destination: dest,
+		travelMode: google.maps.DirectionsTravelMode.WALKING, // BICYCLING, DRIVING, WALKING
+		unitSystem: google.maps.DirectionsUnitSystem.METRIC,
+		provideRouteAlternatives: false // 替わりの道
+	};
+	dirs.route(request, function(response, status) {
+		if (status == google.maps.DirectionsStatus.OK) {
+			directionsRenderer.setDirections(response);
+		} else {
+			$('route').textContent = "ルート探索に失敗しました";
+		}
+	});
+}
+
+var parseInt2 = function(n) {
+	var n = parseInt(n);
+	if (isNaN(n))
+		return "-";
+	return n;
+};
+var xml2json = function(url, callback) {
+	var host = "fukuno.jig.jp";
+//	var host = "localhost:8080";
+	var base = "http://" + host + "/proxy/ITqT5WkhCf2yn1s9?cnv=xml2json";
+	var url2 = base + "&cache=no&callback=" + callback + "&url=" + encodeURI(url);
+	jsonp(url2);
+};
+var jsonp = function(url) {
+	var head = document.getElementsByTagName("head")[0];
+   	var script = document.createElement("script");
+    script.setAttribute("src", url);
+    script.setAttribute("type", "text/javascript");
+	script.setAttribute("id", 'jsonp');
+	head.appendChild(script);
+};
+
+window.addEventListener("load", function() {
+	if (window.pageYOffset <= 1) {
+		setTimeout(function(){
+			scrollTo(0, 1);
+		}, 1);
+	}
+}, false);
+
+</script>
+<style>
+body {
+	margin: 0px;
+	text-align: center;
+	box-sizing: border-box; /* width include border */
+	-webkit-text-size-adjust: none; /* for iPhone */
+}
+#list {
+	display: none;
+}
+#map {
+	height: 220px;
+}
+#route {
+}
+#info {
+	text-align: center;
+}
+#data {
+	text-align: left;
+}
+#data #title {
+	font-size: 120%;
+	font-weight: bold;
+	margin: 0px;
+}
+.nbtn {
+	font-size: 16px;
+	line-height: 24px;
+	height: 30px;
+	width: 100px;
+	border: 1px solid black;
+}
+#tname {
+	font-size: 20px;
+	padding-left: 14px;
+}
+@media screen and (min-width: 640px) {
+	#list {
+		display: inline-block;
+		text-align: left;
+		width: 158px;
+		height: 478px;
+		margin: 0px;
+		overflow-y: auto;
+		vertical-align: top;
+		border: 1px solid gray;
+		cursor: pointer;
+	}
+	#list div:hover {
+		background: #cde2fb;
+		color: black;
+	}
+	#navi {
+		width: 480px;
+		display: inline-block;
+		vertical-align: top;
+	}
+	#map {
+		height: 480px;
+	}
+	#route {
+		vertical-align: top;
+		display: inline-block;
+		width: 300px;
+		height: 480px;
+		overflow-y: auto;
+	}
+	#info {
+		display: none;
+	}
+}
+</style>
+</head>
+<body>
+
+<div id='main'>
+
+<div id='list'></div><div id='navi'>
+<div id='map'></div>
+<button class='nbtn' id='btnp'>前候補</button>
+<button class='nbtn' id='btnf'>最短</button>
+<button class='nbtn' id='btnn'>次候補</button>
+<div id="info"></div>
+</div>
+
+<div id="route"></div>
+
+
+</div>
+
+<div id='credit'>
+<img id='help'>
+<a href='http://fukuno.jig.jp/2012/'>(c)taisukef CED</a>
+</div>
+<div id='helptips'><div id='helptipscontent'>
+避難所ナビ（鯖江市版）<br>
+<br>
+現在位置から近くの避難所までの徒歩ルートをGoogleのルート検索APIを使い近い順に表示します。鯖江市からCC BYで公開された「<a href='http://www.city.sabae.fukui.jp/pageview.html?id=11601' target='_blank'>Dataシティさばえ（災害時の避難所の位置情報（XML化））</a>」を使っています。<br>
+PC、Android、iPhone対応（モバイル版は一覧非表示）<br>
+現在位置情報を提供しないと、鯖江駅からのルートを表示するデモモードになります。<br>
+<br>
+地図は、地球上の範囲を表すコード「<a href='geo3x3.html' target='_blank'>Geo3x3</a>」を使っています。<br>
+<br>
+ライセンス：<a rel='license' href='http://creativecommons.org/licenses/by-nc-sa/3.0/deed.ja' target='_blank'>CC BY-NC-SA</a><br>
+※本フォーマットに従った、他の自治体などに対応させるなどして、ご利用いただければ幸いです。<br>
+</div></div>
+
+</body>
+</html>

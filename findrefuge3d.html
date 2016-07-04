@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"/>
+<title>避難所ナビ3D</title>
+<meta property="og:image" content="http://fukuno.jig.jp/app/find/findrefuge3d.png"/>
+<link rel="apple-touch-icon" href="http://fukuno.jig.jp/app/find/findrefuge3d.png"/>
+<script src="lib/fukuno.js"></script>
+<script src="lib/three.min.js"></script>
+<script>"use strict";
+
+var DEFAULT_LAT = 34.690273;
+var DEFAULT_LNG = 135.195508; // 神戸市役所
+/*
+var DEFAULT_LAT = 35.943187;
+var DEFAULT_LNG = 136.188701; // 鯖江駅
+*/
+
+window.onload = function() {
+	initThree();
+	initCamera();
+	initLight();
+//	initObject();
+	loop();
+	
+	var nodata = false;
+	var putObject = function(data) {
+//		dump(data);
+		if (data.length == 0) {
+			if (nodata)
+				return;
+			nodata = true;
+			loadPOI(DEFAULT_LAT, DEFAULT_LNG, putObject);
+			return;
+		}
+		var minx = 1000;
+		var maxx = -1000;
+		var miny = 1000;
+		var maxy = -1000;
+		for (var i = 0; i < data.length; i++) {
+			var y = data[i].lat.value;
+			var x = data[i].lng.value;
+			if (x < minx)
+				minx = x;
+			if (x > maxx)
+				maxx = x;
+			if (y < miny)
+				miny = y;
+			if (y > maxy)
+				maxy = y;
+		}
+		var sw = 2000;
+		for (var i = 0; i < data.length; i++) {
+			var y = data[i].lat.value;
+			var x = data[i].lng.value;
+
+			for (var j = 0; j < 2; j++) {
+				var mesh = tri();
+				var px = (x - minx) / (maxx - minx) * sw - sw / 2
+				var py = (y - miny) / (maxy - miny) * sw - sw / 2;
+				mesh.position.set(px, py, 10 + j * 2);
+				scene.add(mesh);
+			}
+		}
+	};
+	var watchid = navigator.geolocation.watchPosition(function(p) {
+		navigator.geolocation.clearWatch(watchid);
+		watchid = null;
+		var lat = p.coords.latitude;
+		var lng = p.coords.longitude;
+		loadPOI(lat, lng, putObject);
+	}, function(e) {
+		alert("現在位置を取得できませんでした。GPSなどがONになっているかご確認ください。\ncheck GPS settings");
+		loadPOI(DEFAULT_LAT, DEFAULT_LNG, putObject);
+	}, {
+		maximumAge: 30000,
+		enableHighAccuracy: 1
+	});
+	
+};
+
+var renderer;
+var scene;
+var canvas;
+var camera;
+
+var rotx, roty, rotz;
+
+var initThree = function() {
+	canvas = document.getElementById("canvas");
+	renderer = new THREE.WebGLRenderer({ antialias: true });
+	if (!renderer) {
+		alert('Three.js の初期化に失敗しました');
+		return;
+	}
+	renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+	canvas.appendChild(renderer.domElement);
+	
+	renderer.setClearColor(0, 1.0);
+//	renderer.shadowMapEnabled = true;
+	
+	scene = new THREE.Scene();
+	
+	var startx, starty;
+	var startrotx, startroty;
+	rotx = 0;
+	roty = -8;
+	rotz = 0;
+	var uidown = false;
+	var onuidown = function(e) {
+		startx = e.clientX;
+		starty = e.clientY;
+		startrotx = rotx;
+		startroty = roty;
+		uidown = true;
+	};
+	var onuimove = function(e) {
+		if (!uidown)
+			return;
+		rotx = (e.clientX - startx) * 0.01 + startrotx;
+		roty = (e.clientY - starty) * 0.03 + startroty;
+	};
+	var onuiup = function(e) {
+		uidown = false;
+	};
+	canvas.addEventListener("mousedown", function(e) {
+		onuidown(e);
+	});
+	canvas.addEventListener("mousemove", function(e) {
+		onuimove(e);
+	});
+	canvas.addEventListener("mouseup", function(e) {
+		onuiup(e);
+	});
+	canvas.addEventListener("touchmove", function(e) {
+		e.clientX = e.touches[0].clientX;
+		e.clientY = e.touches[0].clientY;
+		e.preventDefault();
+		onuimove(e);
+	});
+	canvas.addEventListener("touchstart", function(e) {
+		e.clientX = e.touches[0].clientX;
+		e.clientY = e.touches[0].clientY;
+		onuidown(e);
+	});
+	canvas.addEventListener("touchend", function(e) {
+		onuiup(e);
+	});
+	
+	// compass
+	/*
+	window.addEventListener('devicemotion', function(e) {
+		var x = e.acceleration.x;
+		var y = e.acceleration.y;
+		var z = e.acceleration.z;
+		
+		var ralpha = e.rotationRate.alpha;
+		var rbeta = e.rotationRate.beta;
+		var rgamma = e.rotationRate.gamma;
+	});
+	*/
+};
+var initCamera = function() {
+	camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 1, 10000);
+	camera.position.set(150, 50, 100);
+	camera.up.set(0, 0, 1); // カメラの上
+	camera.lookAt({ x: 0, y: 0, z: 40 });
+};
+
+var pointLight;
+var spotLight;
+var initLight = function() {
+//	var light = new THREE.DirectionalLight(0xcccccc, 10.6);   
+//	scene.add(light);
+	scene.add(new THREE.AmbientLight(0xcccccc));
+/*
+	pointLight = new THREE.PointLight(0xFFFFFF);
+	pointLight.position.set(50, 50, 10);
+	scene.add(pointLight);
+	  
+
+	spotLight = new THREE.SpotLight(0xFFFFFF, 1.0, 0, Math.PI / 10, 100);
+	spotLight.position.set(100, 100, 200);
+	spotLight.onlyShadow = true;
+
+	spotLight.castShadow = true;
+	spotLight.shadowDarkness = 0.5;
+
+	spotLight.shadowMapWidth = 2048;
+	spotLight.shadowMapHeight = 2048;
+	spotLight.shadowCameraVisible = false;
+	spotLight.shadowCameraFov = 90;
+	spotLight.shadowCameraNear = 5;
+	spotLight.shadowDarkness = 0.5;
+
+	scene.add(spotLight);
+*/
+};
+
+var tri = function() {
+	var w = 10;
+	var w2 = w * Math.sqrt(2) / 2;
+	var geometry = new THREE.Geometry();
+	geometry.vertices.push(new THREE.Vector3( 0.0,  w, 0.0));
+	geometry.vertices.push(new THREE.Vector3(-w2, -w, 0.0));
+	geometry.vertices.push(new THREE.Vector3( w2, -w, 0.0));
+	geometry.faces.push(new THREE.Face3(0, 1, 2)); 
+	var material = new THREE.MeshBasicMaterial({ color: 0x20f020, side:THREE.DoubleSide, opacity: 0.5, transparent:true });
+	var mesh = new THREE.Mesh(geometry, material);
+	return mesh;
+};
+
+var TYPE = "http://purl.org/jrrk#EmergencyFacility";
+var HOW_FAR_DEG_FROM_HEAR = 0.05; // 0.01;
+
+var loadPOI = function(lat, lng, callback) {
+//	currentpos = ll = getLL(35.903508,136.168782);
+
+	// google.maps.event.addListener(map, "idle", function() {
+	/*
+	var b = map.getBounds();
+	if (!b)
+		return;
+	var latmin = b.getNorthEast().lat();
+	var lngmin = b.getNorthEast().lng();
+	var latmax = b.getSouthWest().lat();
+	var lngmax = b.getSouthWest().lng();
+	alert(latmin + " " + lngmin + " " + latmax + " " + lngmax);
+	*/
+	var dll = HOW_FAR_DEG_FROM_HEAR;
+	var latmin = lat - dll;
+	var latmax = lat + dll;
+	var lngmin = lng - dll;
+	var lngmax = lng + dll;
+	
+//	return;
+
+/*
+ "http://purl.org/jrrk#CivicFacility": { icon: "icon_facility.png", name: "施設" },
+"http://purl.org/jrrk#EmergencyFacility": { icon: "icon_emergency.png", name: "避難所" },
+//http://purl.org/jrrk#temporaryGatheringLocation
+ "http://purl.org/jrrk#FarmersMarket": { icon: "icon_tomato.png", name: "農産物直売所" },
+//http://purl.org/jrrk#RoadConstruction
+ "http://purl.org/jrrk#AED": { icon: "icon_aed.png", name: "AED設置場所" },
+ "http://purl.org/jrrk#PublicToilet": { icon: "icon_toilet.png", name: "公衆トイレ" },
+ "http://purl.org/jrrk#Hydrant": { icon: "icon_hydrant.png", name: "消火栓" },
+//  http://purl.org/jrrk#CivicPOI
+//http://purl.org/jrrk#RequiringAssistanceAuthorizedUsersFacilityDisaster
+ "http://purl.org/jrrk#MedicalInstitute": { icon: "icon_clinic.png", name: "病院" },
+*/	
+	var q =
+		"PREFIX jrrk: <http://purl.org/jrrk#>\n" +
+		"PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" +
+		"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+		"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+		"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+		"select ?s ?name ?lat ?lng {\n" + 
+		"?s rdf:type <" + TYPE + ">;\n" +
+		"rdfs:label ?name;\n" +
+		"geo:lat ?lat;\n" +
+		"geo:long ?lng.\n" +
+		" filter(xsd:float(?lat) < " + latmax + " && xsd:float(?lat) > " + latmin + " && xsd:float(?lng) < " + lngmax + " && xsd:float(?lng) > " + lngmin + ")" +
+		"}";
+
+//alert(lat + " " + lng);
+	var baseurl = "http://sparql.odp.jig.jp/data/sparql";
+	var url = baseurl + "?query=" + encodeURIComponent(q) + "&output=json";
+	var func = function(data) {
+//		dump(data);
+		var items = data.results.bindings;
+		callback(items);
+	};
+	url += "&callback=" + getCallbackMethod(func);
+	jsonp(url);
+//	window.getdata = func;
+//	jsonp("testjson2.js");
+};
+
+
+var initObject = function() {
+	for (var i = 0; i < 10; i++) {
+		for (var j = 0; j < 2; j++) {
+			var mesh = tri();
+			mesh.position.set(10 + i * 50, 10, 10 + j * 2);
+			scene.add(mesh);
+		}
+	}
+	
+	/*
+	var geometry = new THREE.PlaneGeometry(1000, 1000, 100, 100);
+	var material = new THREE.MeshLambertMaterial({ color: 0xEEEEEE });
+	var plane = new THREE.Mesh(geometry, material);
+	plane.receiveShadow = true;
+	scene.add(plane);
+	*/
+};
+
+var t = 0;
+var loop = function() {
+	t++;
+	
+	var x = 120 * Math.cos(t / 50);
+	var y = 120 * Math.sin(t / 50);
+	var z = 30 * Math.cos(t / 100) + 32;
+//	pointLight.position.set(x, y, z);
+//	spotLight.position.set(x, y, z);
+	
+	rotx -= 0.001;
+	var cx = 200 * Math.cos(-rotx);
+	var cy = 200 * Math.sin(-rotx);
+	var cz = 500 + roty * 20;
+	if (cz < 10)
+		cz = 10;
+	camera.position.set(cx, cy, cz);
+	camera.lookAt({ x: 0, y: 0, z: 40 });
+	
+	renderer.clear();
+	renderer.render(scene, camera);
+	
+	requestAnimationFrame(loop);
+};
+</script>
+<style>
+body {
+	margin: 0px;
+	text-align: center;
+}
+#canvas {
+	width: 100%;
+	height: 400px;
+}
+#cc {
+	margin: 20px;
+}
+a {
+	color: gray !important;
+}
+#debug {
+	text-align: left;
+}
+</style>
+</head>
+<body>
+<div id="canvas"></div>
+<div id="cc">
+DATA: CC BY <a href=http://sparql.odp.jig.jp/ target=_blank>odp SPARQL Endpoint</a><br>
+3D library <a href=http://threejs.org/ target=_blank>three.js - Javascript 3D library</a><br>
+APP: CC BY <a href=http://fukuno.jig.jp/1011 target=_blank>福野泰介の一日一創</a>
+</div>
+</div>
+</body>
+</html>
