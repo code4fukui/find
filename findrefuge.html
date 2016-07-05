@@ -9,6 +9,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
 <meta name="format-detection" content="telephone=no">
 <script src="lib/fukuno.js"></script>
+<script src="lib/odp.js"></script>
+<script src="lib/gmap.js"></script>
 <script>"use strict";
 
 var DEFAULT_ORG;
@@ -237,8 +239,6 @@ var loadRefuge = function(ll, funcnext) {
 		"}";
 
 //alert(lat + " " + lng);
-	var baseurl = "http://sparql.odp.jig.jp/data/sparql";
-	var url = baseurl + "?query=" + encodeURIComponent(q) + "&output=json";
 	var func = function(data) {
 //		dump(data);
 		var items = data.results.bindings;
@@ -265,10 +265,7 @@ var loadRefuge = function(ll, funcnext) {
 		
 		funcnext();
 	};
-	url += "&callback=" + getCallbackMethod(func);
-	jsonp(url);
-//	window.getdata = func;
-//	jsonp("testjson2.js");
+	querySPARQL(q, func);
 };
 
 var getNearPosition = function(lat, lng) {
@@ -525,10 +522,6 @@ var getLanguage2 = function() {
 		lang = hash.substring(1);
 	}
 	return lang;
-};
-var loadLocalAPI = function() {
-	var apiurl = "http://maps.google.com/maps/api/js?sensor=true&language=" + getLanguage2();
-	document.write('<' + 'script src="' + apiurl + '"' + ' type="text/javascript"><' + '/script>');
 };
 loadLocalAPI();
 
