@@ -260,7 +260,7 @@ var loadRefuge = function(ll, funcnext) {
 //	jsonp("testjson2.js");
 };
 var querySPARQL = function(q, callback) {
-	var baseurl = "http://sparql.odp.jig.jp/data/sparql";
+	var baseurl = "https://sparql.odp.jig.jp/data/sparql";
 	var url = baseurl + "?query=" + encodeURIComponent(q) + "&output=json";
 	url += "&callback=" + getCallbackMethod(callback);
 	jsonp(url);
@@ -581,7 +581,8 @@ var getLanguage2 = function() {
 	return lang;
 };
 var loadLocalAPI = function() {
-	var apiurl = "http://maps.google.com/maps/api/js?sensor=true&language=" + getLanguage2();
+	var apikey = "AIzaSyCfbWrf5isAqdEGdSNxa_NeUDqThEmRt8Q";
+	var apiurl = "//maps.google.com/maps/api/js?sensor=true&key=" + apikey + "&language=" + getLanguage2();
 	document.write('<' + 'script src="' + apiurl + '"' + ' type="text/javascript"><' + '/script>');
 };
 loadLocalAPI();
