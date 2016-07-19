@@ -152,8 +152,8 @@ var makeMarkerItem = function(d, icon) {
 };
 var clearMarkers = function() {
 	for (var i = 0; i < markers.length; i++) {
-		markers[i].setMap(null);
 		markers[i].circle.setMap(null);
+		markers[i].setMap(null);
 	}
 };
 var first = true;
@@ -219,7 +219,7 @@ var loadPOI = function(callback, ll, funcnext) {
 			callback(d);
 		}
 		if (data.length > 0)
-		map.fitBounds(bounds);
+			map.fitBounds(bounds);
 		
 		funcnext();
 	};
@@ -490,10 +490,12 @@ var stopPosition = function() {
 	if (watchid) {
 		navigator.geolocation.clearWatch(watchid);
 		watchid = null;
-		get("btngps").textContent = "GPS OFF";
+	}
+	if (circle) {
 		circle.setMap(null);
 		circle = null;
 	}
+	get("btngps").textContent = "GPS OFF";
 }
 var getPositionGPS = function() {
 	if (watchid != null) {
