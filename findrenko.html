@@ -242,19 +242,21 @@ var queryRenko = function(lat, lng, dll, callback) {
 	var res = null;
 	for (var i = 0; i < endpoint.length; i++) {
 		for (var j = 0; j < regptn.length; j++) {
+			n++;
 			queryRenkoInner(endpoint[i], lat, lng, regptn[i][j], dll, function(data) {
-				//				dump(data);
+					//				dump(data);
+				console.log(n + " "+ data.results.bindings.length);
 				if (!res) {
 					res = data;
 				} else {
-					for (var i = 0; i < data.results.bindings.length; i++)
-					res.results.bindings.push(data.results.bindings[i]);
+					for (var i = 0; i < data.results.bindings.length; i++) {
+						res.results.bindings.push(data.results.bindings[i]);
+					}
 				}
 				n--;
 				if (n == 0)
 					callback(res);
 			});
-			n++;
 		}
 	}
 };
