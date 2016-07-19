@@ -160,9 +160,6 @@ var clearMarkers = function() {
 	}
 };
 var isSchool = function(d) {
-	console.log(d.type);
-	return true;
-	
 	var s = d.type;
 	if (s.indexOf("学校") >= 0)
 		return true;
@@ -229,10 +226,11 @@ var loadPOI = function(callback, ll, funcnext) {
 //	window.getdata = func;
 //	jsonp("testjson2.js");
 };
+var ENDPOINT_OSAKA = "https://data.city.osaka.lg.jp/sparql";
 var queryRenko = function(lat, lng, dll, callback) {
 	var endpoint = [
 		"https://sparql.odp.jig.jp/api/v1/sparql",
-		"https://data.city.osaka.lg.jp/sparql",
+		ENDPOINT_OSAKA,
 	];
 	var regptn = [
 	[ "学校|医療機関|病院|保育園|幼稚園" ],
@@ -290,7 +288,8 @@ var querySPARQL = function(baseurl, q, callback) {
 };
 	
 var queryItemSPARQL = function(uri, callback) {
-	querySPARQL("select * { <" + uri + "> ?p ?o }", callback);
+	alert(uri);
+	querySPARQL(ENDPOINT_OSAKA, "select * { <" + uri + "> ?p ?o }", callback);
 };
 var getDistance = function(lat1, lng1, lat2, lng2) {
 	var dlat = (lat2 - lat1) * Math.PI / 180;
