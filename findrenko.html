@@ -106,11 +106,7 @@ var init = function() {
 			if (!watchid) {
 				getPositionGPS();
 			} else {
-				navigator.geolocation.clearWatch(watchid);
-				watchid = null;
-				get("btngps").textContent = "GPS OFF";
-				circle.setMap(null);
-				circle = null;
+				stopPosition();
 			}
 		} else {
 			alert("GPS設定をONにしてください");
@@ -199,6 +195,7 @@ var loadPOI = function(callback, ll, funcnext) {
 		
 		if (items.length == 0) {
 			alert("付近にデータがないため、デモとして大阪市付近を表示します");
+			stopPosition();
 			var lat = 34.678395;
 			var lng = 135.4601305;
 			queryRenko(lat, lng, dll, f);
@@ -226,10 +223,11 @@ var loadPOI = function(callback, ll, funcnext) {
 //	window.getdata = func;
 //	jsonp("testjson2.js");
 };
+var ENDPOINT_ODP = "https://sparql.odp.jig.jp/api/v1/sparql";
 var ENDPOINT_OSAKA = "https://data.city.osaka.lg.jp/sparql";
 var queryRenko = function(lat, lng, dll, callback) {
 	var endpoint = [
-		"https://sparql.odp.jig.jp/api/v1/sparql",
+		ENDPOINT_ODP,
 		ENDPOINT_OSAKA,
 	];
 	var regptn = [
@@ -288,8 +286,12 @@ var querySPARQL = function(baseurl, q, callback) {
 };
 	
 var queryItemSPARQL = function(uri, callback) {
-	alert(uri);
-	querySPARQL(ENDPOINT_OSAKA, "select * { <" + uri + "> ?p ?o }", callback);
+//	alert(uri);
+	if (uri.startsWith("http://data.city.osaka.lg.jp/")) {
+		querySPARQL(ENDPOINT_OSAKA, "select * { <" + uri + "> ?p ?o }", callback);
+	} else {
+		querySPARQL(ENDPOINT_ODP, "select * { <" + uri + "> ?p ?o }", callback);
+	}
 };
 var getDistance = function(lat1, lng1, lat2, lng2) {
 	var dlat = (lat2 - lat1) * Math.PI / 180;
@@ -479,6 +481,15 @@ var setPosition = function(ll, accuracy) {
 	}, ll, function() {
 //		findNear();
 	});
+}
+var stopPosition = function() {
+	if (watchid) {
+		navigator.geolocation.clearWatch(watchid);
+		watchid = null;
+		get("btngps").textContent = "GPS OFF";
+		circle.setMap(null);
+		circle = null;
+	}
 }
 var getPositionGPS = function() {
 	if (watchid != null) {
