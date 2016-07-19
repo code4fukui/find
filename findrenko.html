@@ -155,6 +155,8 @@ var clearMarkers = function() {
 		markers[i].setMap(null);
 	}
 };
+var first = true;
+
 var isSchool = function(d) {
 	var s = d.type;
 	if (s.indexOf("学校") >= 0)
@@ -191,7 +193,8 @@ var loadPOI = function(callback, ll, funcnext) {
 		//		dump(data);
 		var items = data.results.bindings;
 		
-		if (items.length == 0) {
+		if (items.length == 0 && first) {
+			first = false;
 			alert("付近にデータがないため、デモとして大阪市付近を表示します");
 			stopPosition();
 			var lat = 34.702627;
@@ -626,7 +629,7 @@ body {
 
 <div class="src">
 APP: CC BY <a href=http://fukuno.jig.jp/1456 target=_blank>オープンデータ選挙カー連呼スポット探しアプリ - 福野泰介の一日一創</a>(<a href=findrenko.html>odpのみ版</a>)<br>
-			DATA: CC BY <a href=http://sparql.odp.jig.jp/ target=_blank>odp SPARQL Endpoint</a>, <a href=http://data.city.osaka.lg.jp>大阪市オープンデータポータルサイト</a><br>
+			DATA: CC BY <a href=https://sparql.odp.jig.jp/ target=_blank>odp SPARQL Endpoint</a>, <a href=http://data.city.osaka.lg.jp>大阪市オープンデータポータルサイト</a><br>
 </div>
 
 <!--
