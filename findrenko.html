@@ -196,6 +196,7 @@ var loadPOI = function(callback, ll, funcnext) {
 			stopPosition();
 			var lat = 34.678395;
 			var lng = 135.4601305;
+			map.setCenter(getLL(lat, lng));
 			queryRenko(lat, lng, dll, f);
 			return;
 		}
@@ -623,8 +624,8 @@ body {
 </div>
 
 <div class="src">
-APP: CC BY <a href=http://fukuno.jig.jp/1069 target=_blank>オープンデータ選挙カー連呼スポット探しアプリ - 福野泰介の一日一創</a><br>
-DATA: CC BY <a href=http://sparql.odp.jig.jp/ target=_blank>odp SPARQL Endpoint</a><br>
+APP: CC BY <a href=http://fukuno.jig.jp/1456 target=_blank>オープンデータ選挙カー連呼スポット探しアプリ - 福野泰介の一日一創</a>(<a href=findrenko.html>odpのみ版</a>)<br>
+			DATA: CC BY <a href=http://sparql.odp.jig.jp/ target=_blank>odp SPARQL Endpoint</a>, <a href=http://data.city.osaka.lg.jp>大阪市オープンデータポータルサイト</a><br>
 </div>
 
 <!--
