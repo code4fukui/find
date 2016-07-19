@@ -153,6 +153,7 @@ var makeMarkerItem = function(d, icon) {
 var clearMarkers = function() {
 	for (var i = 0; i < markers.length; i++) {
 		markers[i].setMap(null);
+		markers[i].circle.setMap(null);
 	}
 };
 var first = true;
@@ -387,7 +388,7 @@ var makeMarker = function(map, pos, data, icon) {
 	});
 	
 	var radius = 300;
-	var circle = new google.maps.Circle({
+	m.circle = new google.maps.Circle({
 		map: map,
 		center: pos,
 		fillColor: "#33ff33",
