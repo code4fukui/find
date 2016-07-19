@@ -193,19 +193,19 @@ var loadPOI = function(callback, ll, funcnext) {
 	
 //	return;
 	var dll = HOW_FAR_DEG_FROM_HEAR;
-
-	queryRenko(lat, lng, dll, function(data) {
-//		dump(data);
+	
+	var f = function(data) {
+		//		dump(data);
 		var items = data.results.bindings;
-			
-			if (items.length == 0) {
-				alert("付近にデータがないため、デモとして大阪市付近を表示します");
-				var lat = 34.678395;
-				var lng = 135.4601305;
-				var dll = 0.05;
-				queryRenko(lat, lng, dll, callback);
-				return;
-			}
+		
+		if (items.length == 0) {
+			alert("付近にデータがないため、デモとして大阪市付近を表示します");
+			var lat = 34.678395;
+			var lng = 135.4601305;
+			var dll = 0.05;
+			queryRenko(lat, lng, dll, f);
+			return;
+		}
 		
 		bounds = new google.maps.LatLngBounds();
 		for (var i = 0; i < items.length; i++) {
@@ -220,10 +220,11 @@ var loadPOI = function(callback, ll, funcnext) {
 			callback(d);
 		}
 		if (data.length > 0)
-			map.fitBounds(bounds);
+		map.fitBounds(bounds);
 		
 		funcnext();
-	});
+	};
+	queryRenko(lat, lng, dll, f);
 //	window.getdata = func;
 //	jsonp("testjson2.js");
 };
