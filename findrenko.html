@@ -194,9 +194,10 @@ var loadPOI = function(callback, ll, funcnext) {
 		if (items.length == 0) {
 			alert("付近にデータがないため、デモとして大阪市付近を表示します");
 			stopPosition();
-			var lat = 34.678395;
-			var lng = 135.4601305;
+			var lat = 34.702627;
+			var lng = 135.496208;
 			map.setCenter(getLL(lat, lng));
+			map.setZoom(15);
 			queryRenko(lat, lng, dll, f);
 			return;
 		}
@@ -240,7 +241,7 @@ var queryRenko = function(lat, lng, dll, callback) {
 			n++;
 			queryRenkoInner(endpoint[i], lat, lng, regptn[i][j], dll, function(data) {
 					//				dump(data);
-				console.log(n + " "+ data.results.bindings.length);
+//				console.log(n + " "+ data.results.bindings.length);
 				if (!res) {
 					res = data;
 				} else {
