@@ -194,6 +194,15 @@ var loadPOI = function(callback, ll, funcnext) {
 	queryRenko(lat, lng, dll, function(data) {
 //		dump(data);
 		var items = data.results.bindings;
+			
+			if (items.length == 0) {
+				alert("付近にデータがないため、デモとして大阪市付近を表示します");
+				var lat = 34.678395;
+				var lng = 135.4601305;
+				var dll = 0.05;
+				queryRenko(lat, lng, dll, callback);
+				return;
+			}
 		
 		bounds = new google.maps.LatLngBounds();
 		for (var i = 0; i < items.length; i++) {
@@ -440,6 +449,7 @@ var setPosition = function(ll, accuracy) {
 	currentpos = ll;
 	if (circle != null) {
 		circle.setCenter(ll);
+		map.setCenter(ll);
 		return;
 	}
 	map.setCenter(ll);
@@ -484,7 +494,7 @@ var getPositionGPS = function() {
 		alert("現在位置を取得できませんでした。GPSなどがONになっているかご確認ください。\ncheck GPS settings");
 		get("btngps").textContent = "GPS OFF";
 	}, {
-		maximumAge: 30000,
+		maximumAge: 5000,
 		enableHighAccuracy: 1
 	});
 };
@@ -494,22 +504,6 @@ var parseInt2 = function(n) {
 	if (isNaN(n))
 		return "-";
 	return n;
-};
-var xml2json = function(url, callback) {
-//	var host = "fukuno.jig.jp";
-//	var host = "localhost:8080";
-	var host = "sabae.cc";
-	var base = "http://" + host + "/proxy/ITqT5WkhCf2yn1s9?cnv=xml2json";
-	var url2 = base + "&cache=no&callback=" + getCallbackMethod(callback) + "&url=" + encodeURI(url);
-	jsonp(url2);
-};
-var jsonp = function(url) {
-	var head = document.getElementsByTagName("head")[0];
-   	var script = document.createElement("script");
-    script.setAttribute("src", url);
-    script.setAttribute("type", "text/javascript");
-//	script.setAttribute("id", 'jsonp');
-	head.appendChild(script);
 };
 
 var getLanguage2 = function() {
