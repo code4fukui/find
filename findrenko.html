@@ -160,7 +160,7 @@ var clearMarkers = function() {
 	}
 };
 var isSchool = function(d) {
-	var s = d.name;
+	var s = d.type;
 	if (s.indexOf("学校") >= 0)
 		return true;
 	if (s.indexOf("幼稚園") >= 0)
@@ -207,9 +207,6 @@ var loadPOI = function(callback, ll, funcnext) {
 		bounds = new google.maps.LatLngBounds();
 		for (var i = 0; i < items.length; i++) {
 			var it = items[i];
-			it.type = { value: TYPE };
-//			if (!icons[it.type.value])
-//				continue;
 			var d = {
 				uri: it.uri.value,
 				type: it.type.value,
