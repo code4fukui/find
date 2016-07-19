@@ -160,6 +160,9 @@ var clearMarkers = function() {
 	}
 };
 var isSchool = function(d) {
+	console.log(d.type);
+	return true;
+	
 	var s = d.type;
 	if (s.indexOf("学校") >= 0)
 		return true;
