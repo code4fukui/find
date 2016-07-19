@@ -169,7 +169,7 @@ var isSchool = function(d) {
 		return true;
 	return false;
 };
-var loadPOI = function(callback, ll, funcnext) {
+var loadPOI = function(type, callback, ll, funcnext) {
 //	currentpos = ll = getLL(35.903508,136.168782);
 
 	clearMarkers();
@@ -185,13 +185,52 @@ var loadPOI = function(callback, ll, funcnext) {
 	var lngmax = b.getSouthWest().lng();
 	alert(latmin + " " + lngmin + " " + latmax + " " + lngmax);
 	*/
+	var dll = HOW_FAR_DEG_FROM_HEAR;
 	var lat = ll.lat();
 	var lng = ll.lng();
+	var latmin = lat - dll;
+	var latmax = lat + dll;
+	var lngmin = lng - dll;
+	var lngmax = lng + dll;
 	
 //	return;
-	var dll = HOW_FAR_DEG_FROM_HEAR;
 
-	queryRenko(lat, lng, dll, function(data) {
+/*
+ "http://purl.org/jrrk#CivicFacility": { icon: "icon_facility.png", name: "施設" },
+"http://purl.org/jrrk#EmergencyFacility": { icon: "icon_emergency.png", name: "避難所" },
+//http://purl.org/jrrk#temporaryGatheringLocation
+ "http://purl.org/jrrk#FarmersMarket": { icon: "icon_tomato.png", name: "農産物直売所" },
+//http://purl.org/jrrk#RoadConstruction
+ "http://purl.org/jrrk#AED": { icon: "icon_aed.png", name: "AED設置場所" },
+ "http://purl.org/jrrk#PublicToilet": { icon: "icon_toilet.png", name: "公衆トイレ" },
+ "http://purl.org/jrrk#Hydrant": { icon: "icon_hydrant.png", name: "消火栓" },
+//  http://purl.org/jrrk#CivicPOI
+//http://purl.org/jrrk#RequiringAssistanceAuthorizedUsersFacilityDisaster
+ "http://purl.org/jrrk#MedicalInstitute": { icon: "icon_clinic.png", name: "病院" },
+ "http://odp.jig.jp/odp/1.0#PosterPlace": { icon: "icon/poster-mini.png", name: "投票ポスター" },
+ "http://odp.jig.jp/odp/1.0#Polls": { icon: "icon/polls.png", name: "投票所" },
+*/	
+
+	var q =
+		"PREFIX jrrk: <http://purl.org/jrrk#>\n" +
+		"PREFIX odp: <http://odp.jig.jp/odp/1.0#>\n" +
+		"PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" +
+		"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+		"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+		"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+		"select ?uri ?name ?lat ?lng {\n" + 
+//		"?uri rdf:type <" + TYPE + ">, jrrk:CivicFacility;\n" +
+		"?uri rdf:type " + type + ";\n" +
+//		"?uri rdf:type jrrk:CivicFacility, odp:Polls, odp:PosterPlace;\n" + // or条件は？
+//		"?uri rdfs:label ?name;\n" +
+		"rdfs:label ?name;\n" +
+		"geo:lat ?lat;\n" +
+		"geo:long ?lng.\n" +
+		" filter(xsd:float(?lat) < " + latmax + " && xsd:float(?lat) > " + latmin + " && xsd:float(?lng) < " + lngmax + " && xsd:float(?lng) > " + lngmin + ")" +
+		"}";
+
+//alert(lat + " " + lng);
+	querySPARQL(q, function(data) {
 //		dump(data);
 		var items = data.results.bindings;
 		
@@ -218,64 +257,12 @@ var loadPOI = function(callback, ll, funcnext) {
 //	window.getdata = func;
 //	jsonp("testjson2.js");
 };
-var queryRenko = function(lat, lng, dll, callback) {
-	var endpoint = [
-	"http://sparql.odp.jig.jp/api/v1/sparql",
-	"https://data.city.osaka.lg.jp/sparql",
-	];
-	var regptn = [
-	[ "学校|医療機関|病院|保育園|幼稚園" ],
-	[ "学校", "病院" ]
-	];
-	var n = 0;
-	var res = null;
-	for (var i = 0; i < endpoint.length; i++) {
-		for (var j = 0; j < regptn.length; j++) {
-			queryRenkoInner(endpoint[i], lat, lng, regptn[i][j], dll, function(data) {
-					//				dump(data);
-					if (!res) {
-						res = data;
-					} else {
-						for (var i = 0; i < data.results.bindings.length; i++)
-						res.results.bindings.push(data.results.bindings[i]);
-					}
-					n--;
-					if (n == 0)
-					callback(res);
-			});
-			n++;
-		}
-	}
-};
-
-var queryRenkoInner = function(endpoint, lat, lng, regptn, dll, callback) {
-	var latmin = lat - dll;
-	var latmax = lat + dll;
-	var lngmin = lng - dll;
-	var lngmax = lng + dll;
-	var q =
-	"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
-	"select ?uri ?name ?type ?lat ?lng {\n" + 
-	"?url <http://imi.ipa.go.jp/ns/core/rdf#地理座標> ?s2.\n" +
-	"?s2 <http://imi.ipa.go.jp/ns/core/rdf#緯度> ?lat.\n" +
-	"?s2 <http://imi.ipa.go.jp/ns/core/rdf#経度> ?lng.\n" +
-	"?url <http://www.w3.org/2000/01/rdf-schema#label> ?name.\n" +
-	"?url <http://imi.ipa.go.jp/ns/core/rdf#種別> ?type.\n" +
-	//		"filter(xsd:long(?lat) < " + latmax + " && ?lat > " + latmin + " && ?lng < " + lngmax + " && ?lng > " + lngmin + ")" +
-	" filter(xsd:float(?lat) < " + latmax + " && xsd:float(?lat) > " + latmin + " && xsd:float(?lng) < " + lngmax + " && xsd:float(?lng) > " + lngmin + ")" + // osakaに必要
-	"filter(regex(?type,\"" + regptn + "\"))\n" + 
-	"}";
-	
-	//alert(lat + " " + lng);
-	querySPARQL(endpoint, q, callback);
-};
-var querySPARQL = function(baseurl, q, callback) {
-	//	var baseurl = "http://sparql.odp.jig.jp/data/sparql";
+var querySPARQL = function(q, callback) {
+	var baseurl = "https://sparql.odp.jig.jp/data/sparql";
 	var url = baseurl + "?query=" + encodeURIComponent(q) + "&output=json";
 	url += "&callback=" + getCallbackMethod(callback);
 	jsonp(url);
 };
-	
 var queryItemSPARQL = function(uri, callback) {
 	querySPARQL("select * { <" + uri + "> ?p ?o }", callback);
 };
@@ -457,12 +444,15 @@ var setPosition = function(ll, accuracy) {
 		radius: accuracy
 	});
 	
-	loadPOI(function(d) {
+	loadPOI("jrrk:CivicFacility", function(d) {
 		if (isSchool(d)) {
 			makeMarkerItem(d, "icon/icon_school.png");
-		} else {
-			makeMarkerItem(d, "icon/icon_clinic.png");
 		}
+	}, ll, function() {
+//		findNear();
+	});
+	loadPOI("jrrk:MedicalInstitute", function(d) {
+		makeMarkerItem(d, "icon/icon_clinic.png");
 	}, ll, function() {
 //		findNear();
 	});
