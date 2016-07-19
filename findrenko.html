@@ -269,11 +269,11 @@ var queryRenkoInner = function(endpoint, lat, lng, regptn, dll, callback) {
 	var q =
 	"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
 	"select ?uri ?name ?type ?lat ?lng {\n" + 
-	"?url <http://imi.ipa.go.jp/ns/core/rdf#地理座標> ?s2.\n" +
+	"?uri <http://imi.ipa.go.jp/ns/core/rdf#地理座標> ?s2.\n" +
 	"?s2 <http://imi.ipa.go.jp/ns/core/rdf#緯度> ?lat.\n" +
 	"?s2 <http://imi.ipa.go.jp/ns/core/rdf#経度> ?lng.\n" +
-	"?url <http://www.w3.org/2000/01/rdf-schema#label> ?name.\n" +
-	"?url <http://imi.ipa.go.jp/ns/core/rdf#種別> ?type.\n" +
+	"?uri <http://www.w3.org/2000/01/rdf-schema#label> ?name.\n" +
+	"?uri <http://imi.ipa.go.jp/ns/core/rdf#種別> ?type.\n" +
 	//		"filter(xsd:long(?lat) < " + latmax + " && ?lat > " + latmin + " && ?lng < " + lngmax + " && ?lng > " + lngmin + ")" +
 	" filter(xsd:float(?lat) < " + latmax + " && xsd:float(?lat) > " + latmin + " && xsd:float(?lng) < " + lngmax + " && xsd:float(?lng) > " + lngmin + ")" + // osakaに必要
 	"filter(regex(?type,\"" + regptn + "\"))\n" + 
