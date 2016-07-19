@@ -190,6 +190,8 @@ var loadPOI = function(callback, ll, funcnext) {
 	*/
 	var lat = ll.lat();
 	var lng = ll.lng();
+	var lat = 34.678395;
+	var lng = 135.4601305;
 	
 //	return;
 	var dll = HOW_FAR_DEG_FROM_HEAR;
@@ -202,7 +204,6 @@ var loadPOI = function(callback, ll, funcnext) {
 			alert("付近にデータがないため、デモとして大阪市付近を表示します");
 			var lat = 34.678395;
 			var lng = 135.4601305;
-			var dll = 0.05;
 			queryRenko(lat, lng, dll, f);
 			return;
 		}
@@ -242,15 +243,15 @@ var queryRenko = function(lat, lng, dll, callback) {
 	for (var i = 0; i < endpoint.length; i++) {
 		for (var j = 0; j < regptn.length; j++) {
 			queryRenkoInner(endpoint[i], lat, lng, regptn[i][j], dll, function(data) {
-					//				dump(data);
-					if (!res) {
-						res = data;
-					} else {
-						for (var i = 0; i < data.results.bindings.length; i++)
-						res.results.bindings.push(data.results.bindings[i]);
-					}
-					n--;
-					if (n == 0)
+				//				dump(data);
+				if (!res) {
+					res = data;
+				} else {
+					for (var i = 0; i < data.results.bindings.length; i++)
+					res.results.bindings.push(data.results.bindings[i]);
+				}
+				n--;
+				if (n == 0)
 					callback(res);
 			});
 			n++;
