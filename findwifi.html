@@ -34,7 +34,7 @@ var ENDPOINT = "https://sparql.odp.jig.jp/api/v1/sparql";
 
 var icons = {
 "http://phenomenontology.linkeddata.es/ontology/Monumento": { icon: "icon_monument.png", name: "Monument" },
-"http://purl.org/jrrk#PublicWIFI": { icon: "icon/128x128/icon_wifi.png", icon_plugs: "icon/128x128/icon_wifi_red.png", name: "Free WiFi", getIcon: function(data) { return data.plugs && data.plugs == "有" ? this.icon_plugs : this.icon } }
+"http://purl.org/jrrk#PublicWIFI": { icon: "icon/icon_wifi.png", icon_plugs: "icon/icon_wifi_red.png", name: "Free WiFi", getIcon: function(data) { return data.plugs && data.plugs == "有" ? this.icon_plugs : this.icon } }
 };
 
 /*
