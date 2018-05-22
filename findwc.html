@@ -469,11 +469,9 @@ var dir = function() {
 };
 var directionsRenderer;
 var directions = function(org, dest) {
-console.log(1);
 	if (directionsRenderer != null) {
 		directionsRenderer.setMap(null);
 		directionsRenderer.setPanel(null);
-console.log(2);
 	}
 	directionsRenderer = new google.maps.DirectionsRenderer();
 	directionsRenderer.setMap(map);
@@ -482,19 +480,17 @@ console.log(2);
 	var request = {
 		origin: org,
 		destination: dest,
-//		travelMode: google.maps.DirectionsTravelMode.WALKING,
+		travelMode: google.maps.DirectionsTravelMode.WALKING,
 //		travelMode: google.maps.DirectionsTravelMode.BICYCLING,
 //		travelMode: google.maps.DirectionsTravelMode.DRIVING,
-		travelMode: google.maps.DirectionsTravelMode.TRANSIT,
+//		travelMode: google.maps.DirectionsTravelMode.TRANSIT,
 		unitSystem: google.maps.DirectionsUnitSystem.METRIC,
 		provideRouteAlternatives: false // another route
 	};
 	dirs.route(request, function(response, status) {
 		if (status == google.maps.DirectionsStatus.OK) {
-console.log(3);
 			directionsRenderer.setDirections(response);
 		} else {
-console.log(4 + " " + status);
 			get('route').textContent = "";
 		}
 	});
