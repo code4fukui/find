@@ -9,6 +9,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
 <meta name="format-detection" content="telephone=no">
 <script src="lib/fukuno.js"></script>
+<script src="lib/gmap.js"></script>
 <script>"use strict";
 
 var DEFAULT_ORG;
@@ -506,7 +507,6 @@ var jsonp = function(url) {
 //	script.setAttribute("id", 'jsonp');
 	head.appendChild(script);
 };
-
 var getLanguage2 = function() {
 	var lang = getLanguage();
 	var hash = document.location.hash;
@@ -514,10 +514,6 @@ var getLanguage2 = function() {
 		lang = hash.substring(1);
 	}
 	return lang;
-};
-var loadLocalAPI = function() {
-	var apiurl = "http://maps.google.com/maps/api/js?sensor=true&language=" + getLanguage2();
-	document.write('<' + 'script src="' + apiurl + '"' + ' type="text/javascript"><' + '/script>');
 };
 loadLocalAPI();
 
