@@ -469,9 +469,11 @@ var dir = function() {
 };
 var directionsRenderer;
 var directions = function(org, dest) {
+console.log(1);
 	if (directionsRenderer != null) {
 		directionsRenderer.setMap(null);
 		directionsRenderer.setPanel(null);
+console.log(2);
 	}
 	directionsRenderer = new google.maps.DirectionsRenderer();
 	directionsRenderer.setMap(map);
@@ -489,8 +491,10 @@ var directions = function(org, dest) {
 	};
 	dirs.route(request, function(response, status) {
 		if (status == google.maps.DirectionsStatus.OK) {
+console.log(3);
 			directionsRenderer.setDirections(response);
 		} else {
+console.log(4);
 			get('route').textContent = "";
 		}
 	});
