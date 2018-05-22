@@ -229,8 +229,9 @@ var loadRefuge2 = function(type, ll, funcnext) {
 		" filter(xsd:float(?lat) < " + latmax + " && xsd:float(?lat) > " + latmin + " && xsd:float(?lng) < " + lngmax + " && xsd:float(?lng) > " + lngmin + ")" +
 		"}";
 //alert(lat + " " + lng);
-	var baseurl = "http://sparql.odp.jig.jp/data/sparql";
+	var baseurl = "https://sparql.odp.jig.jp/data/sparql";
 	var url = baseurl + "?query=" + encodeURIComponent(q) + "&output=json";
+prompt("", url);
 	var func = function(data) {
 //		dump(data);
 		var items = data.results.bindings;
@@ -253,7 +254,8 @@ var loadRefuge2 = function(type, ll, funcnext) {
 		if (data.length > 0)
 			map.fitBounds(bounds);
 		
-		funcnext();
+		if (funcnext)
+			funcnext();
 	};
 	url += "&callback=" + getCallbackMethod(func);
 	jsonp(url);
@@ -336,7 +338,7 @@ var getName = function(data) {
 };
 var getContent = function(data) {
 	var pos = data.pos;
-	var mapurl = "http://maps.google.co.jp/maps?ll=" + pos.lat() + "," + pos.lng();
+	var mapurl = "https://maps.google.co.jp/maps?ll=" + pos.lat() + "," + pos.lng();
 	var s = [];
 	s.push("<div id='data'>");
 	
