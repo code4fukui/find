@@ -538,9 +538,9 @@ var directions = function(org, dest) {
 	});
 }
 
-// mizuyokan
+// ichigojam store
 var loadIchigoJamStore = function(funcnext) {
-	var url = "http://pcn.club/product-shop.rdf";
+	var url = "http://pcn.club/shop/ichigojam-stores.rdf";
 	getJSON(url, function(data) {
 //		dump(data);
 		var items = data["rdf:RDF"]["rdf:Description"];
@@ -734,7 +734,7 @@ body {
 </div>
 
 <div class="src">
-DATA: CC BY <a href=http://pcn.club/product-shop.rdf>IchigoJamが買えるお店</a> by <a href=http://pcn.club/ target=_blank>PCN</a> / <a href=http://www.jam-house.co.jp/kantan_start_pack/kantan_start_pack.html>ジャムハウス かんたんスタートパックが購入できるお店のオープンデータ</a><br>
+DATA: CC BY <a href=http://pcn.club/shop/ichigojam-stores.rdf>IchigoJamが買えるお店</a> by <a href=http://pcn.club/ target=_blank>PCN</a> / <a href=http://www.jam-house.co.jp/kantan_start_pack/kantan_start_pack.html>ジャムハウス かんたんスタートパックが購入できるお店のオープンデータ</a><br>
 APP: CC BY <a href=http://fukuno.jig.jp/1248 target=_blank>福野泰介の一日一創</a>
 </div>
 
