@@ -33,8 +33,8 @@ var ENDPOINT = "https://sparql.odp.jig.jp/api/v1/sparql";
 //var baseurl = "http://geo.linkeddata.es/sparql";
 
 var icons = {
-"http://purl.org/jrrk#PublicToilet": { icon: "img/icon_toilet.png", name: "公衆トイレ" },
-"http://purl.org/jrrk#BusStop": { icon: "img/icon_busstop.png" },
+"http://purl.org/jrrk#PublicToilet": { icon: "icon/icon_toilet2.png", name: "公衆トイレ" },
+"http://purl.org/jrrk#BusStop": { icon: "icon/icon_busstop.png" },
 "http://purl.org/jrrk#PublicWIFI": { icon: "icon/icon_wifi.png", icon_plugs: "icon/icon_wifi_red.png", name: "Free WiFi", getIcon: function(data) { return data.plugs && data.plugs == "有" ? this.icon_plugs : this.icon } }
 };
 
@@ -334,7 +334,7 @@ var searchImage = function(name) {
 };
 var getContent = function(data) {
 	var pos = data.pos;
-	var mapurl = "http://maps.google.co.jp/maps?ll=" + pos.lat() + "," + pos.lng();
+	var mapurl = "https://maps.google.co.jp/maps?ll=" + pos.lat() + "," + pos.lng();
 	var s = [];
 	s.push("<div id='data'>");
 	
