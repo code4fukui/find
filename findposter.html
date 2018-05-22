@@ -232,7 +232,6 @@ var loadRefuge2 = function(type, ll, funcnext) {
 //alert(lat + " " + lng);
 	var baseurl = "https://sparql.odp.jig.jp/data/sparql";
 	var url = baseurl + "?query=" + encodeURIComponent(q) + "&output=json";
-prompt("", url);
 	var func = function(data) {
 //		dump(data);
 		var items = data.results.bindings;
