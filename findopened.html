@@ -3,13 +3,14 @@
 <html>
 <head>
 <meta charset='utf-8'/>
-<title>findwc - トイレを探す - odp</title>
+<title>findopened　- 開いてるところを探す - odp</title>
 <meta property="og:image" content="https://codeforfukui.github.io/findbusstop/ss.jpg">
 <link rel="apple-touch-icon" href="https://codeforfukui.github.io/findbusstop/img/icon_busstop.png"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
 <meta name="format-detection" content="telephone=no">
 <script src="lib/fukuno.js"></script>
 <script src="lib/gmap.js"></script>
+<xscript src="lib/gmap_local.js"></script>
 <script>"use strict";
 
 var DEFAULT_ORG;
@@ -29,8 +30,8 @@ var showNearest = function() {
 };
 
 var TYPE = "http://purl.org/jrrk#PublicToilet";
-var ENDPOINT = "https://sparql.odp.jig.jp/api/v1/sparql";
-//var baseurl = "http://geo.linkeddata.es/sparql";
+//var ENDPOINT = "https://sparql.odp.jig.jp/api/v1/sparql";
+var ENDPOINT = "https://sparql.opendata.cc/data/sparql";
 
 var icons = {
 "http://purl.org/jrrk#PublicToilet": { icon: "icon/icon_toilet2.png", name: "公衆トイレ" },
@@ -188,13 +189,26 @@ var loadRefuge = function(ll, funcnext) {
 	var lngmax = b.getSouthWest().lng();
 	alert(latmin + " " + lngmin + " " + latmax + " " + lngmax);
 	*/
-	var dll = 0.01;
+//	var dll = 0.01;
+	var dll = 3;
 	var lat = ll.lat();
 	var lng = ll.lng();
 	var latmin = lat - dll;
 	var latmax = lat + dll;
 	var lngmin = lng - dll;
 	var lngmax = lng + dll;
+	
+	var getNow =  function() {
+		const d = new Date();
+		var fix = function(n) {
+			if (n < 10)
+				return "0" + n;
+			return n;
+		};
+		const res = fix(d.getHours()) + ":" + fix(d.getMinutes()) + ":" + fix(d.getSeconds());
+		return res;
+	};
+	var time = getNow();
 	
 	/*
 http://purl.org/jrrk#openingHours	10:00～22:30
@@ -207,26 +221,25 @@ http://www.w3.org/2003/01/geo/wgs84_pos#long	136.274166
 http://www.w3.org/2003/01/geo/wgs84_pos#lat	35.951726
 http://schema.org/telephone	0778-65-37777
 	*/
-	var q =
-		"prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-		"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-		"prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" +
-		"prefix jrrk: <http://purl.org/jrrk#>\n" +
-		"select ?s ?name ?nameen ?lat ?lng ?plugs ?hours ?coverage ?graph {\n" + 
-			"graph ?graph {\n" + 
-				"?s rdf:type <" + TYPE + ">;\n" +
-			"rdfs:label ?name;\n" +
-				"geo:lat ?lat;\n" +
-				"geo:long ?lng.\n" +
-				"optional { ?s jrrk:openingHours ?hours. }\n" +
-				"optional { ?s jrrk:hasPlugs ?plugs. }\n" +
-				"optional { ?s jrrk:coverage ?coverage. }\n" +
-			"optional { ?s rdfs:label ?nameen. filter(lang(?nameen) = 'en') }\n" +
-
+	var q = `
+		prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+		prefix ic: <http://imi.go.jp/ns/core/rdf#>
+		select ?uri ?name ?img ?startt ?endt ?dest ?lat ?lng {
+			?uri ic:名称 [ ic:表記 ?name ].
+			?uri ic:利用可能時間 ?t.
+			?t ic:開始時間 ?startt.
+			filter(?startt <= "%TIME%"^^xsd:time)
+			?t ic:終了時間 ?endt.
+			filter(?endt >= "%TIME%"^^xsd:time)
+			optional { ?t ic:説明 ?dest. }
+			optional { ?uri ic:画像 ?img. }
+			?uri ic:地理座標/ic:緯度 ?lat.
+			?uri ic:地理座標/ic:経度 ?lng.
+		}
+		`;
+	q = q.replace(/%TIME%/g, time);
+	
 		//		"filter(?lat < " + latmax + " && ?lat > " + latmin + " && ?lng < " + lngmax + " && ?lng > " + lngmin + ")\n" +
-			"filter(lang(?name) = 'ja')\n" +
-			"}\n" +
-		"}";
 //alert(lat + " " + lng);
 	var url = ENDPOINT + "?query=" + encodeURIComponent(q) + "&output=json";
 //	prompt(q, url);
@@ -234,6 +247,7 @@ http://schema.org/telephone	0778-65-37777
 //		dump(data);
 		var items = data.results.bindings;
 //		alert(items.length);
+		count.textContent = time + "現在、開いているところ：" + items.length + "箇所";
 		
 		bounds = new google.maps.LatLngBounds();
 		for (var i = 0; i < items.length; i++) {
@@ -340,6 +354,11 @@ var getContent = function(data) {
 	
 	s.push("<div>" + trans(icons[data.type].name) + "</div>");
 	s.push("<div id='title'>" + getName(data) + "</div>");
+//	s.push("<a href=" + data.uri + ">詳しい情報へ</a><br>");
+	s.push("開始時間：" + data.startt + "<br>");
+	s.push("終了時間：" + data.endt + "<br>");
+	if (data.dest)
+		s.push("説明：" + data.dest + "<br>");
 	if (data.coverage)
 		s.push("使用可能エリア: " + data.coverage + "<br>");
 	if (data.hours)
@@ -350,19 +369,15 @@ var getContent = function(data) {
 /*	s.push(data.address + "<br>"); */
 	s.push("MAP <a href='" + mapurl + "' target=_blank>" + pos.lat() + "," + pos.lng() + "</a><br>");
 //	s.push("DATA <a href='" + data.url + "' target=_blank>" + data.url + "</a><br>");
-//	debug(data.graph);
-	if (data.graph.startsWith("http://odp.jig.jp/rdf/jp/fukui/sabae/")) {
-		s.push("※<a href=http://www.city.sabae.fukui.jp/pageview.html?id=10525 target=_blank>鯖江市公衆WiFi</a>: sabaewifi / sabae12345678");
-	}
 	s.push("</div>");
 	return s.join('');
 };
 var makeMarker = function(map, pos, data) {
 	var opb = [ "A", "ff3300" ];
 	var op = opb;
-	var icon = icons[data.type].icon
-	if (icons[data.type].getIcon)
-		icon = icons[data.type].getIcon(data);
+	var icon = "icon/icon_info.png"; // icons[data.type].icon
+	if (data.img)
+		icon = data.img;
 	return new google.maps.Marker({
 		position: pos,
 		map: map,
@@ -558,7 +573,7 @@ body {
 	width: 90px;
 	border: none;
 	margin: 4px;
-	background-color: #afb;
+	background-color: #ee8;
 }
 #tname {
 	font-size: 20px;
@@ -597,6 +612,7 @@ body {
 <button class='nbtn' id='btnp'>&lt;&lt;</button>
 <button class='nbtn' id='btnf'>nearest</button>
 <button class='nbtn' id='btnn'>&gt;&gt;</button>
+<div id="count"></div>
 <div id="info"></div>
 </div>
 
@@ -619,17 +635,8 @@ body {
 </div>
 
 <div class="src">
-APP: <a href=http://creativecommons.org/licenses/by/4.0/ target=_blank>CC BY</a> <a href=http://fukuno.jig.jp/1494 target=_blank>Taisuke Fukuno / Create Everyday</a><br>
-SPARQL: <a href=http://sparql.odp.jig.jp/ target=_blank>odp</a><br>
-</div>
-
-<div class="pr">
-[PR]<br>
-<a href=http://fukuno.jig.jp/cntr/?u=https://odp.jig.jp/konohen/ target=_blank>
-<img src=konohen_logo_blue.png width=50%><br>
-「コノヘン」の観光地がサクッと見られるアプリ「コノヘン」<br>
-※5つ星の観光オープンデータ対応の場所でご利用いただけます
-</a>
+APP: <a href=http://creativecommons.org/licenses/by/4.0/ target=_blank>CC BY</a> <a href=http://fukuno.jig.jp/2139 target=_blank>Taisuke Fukuno / Create Everyday</a><br>
+SPARQL: <a href=http://opendata.cc/ target=_blank>opendata.cc</a><br>
 </div>
 
 </body>
