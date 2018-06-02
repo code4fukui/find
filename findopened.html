@@ -359,6 +359,8 @@ var getContent = function(data) {
 	s.push("終了時間：" + data.endt + "<br>");
 	if (data.dest)
 		s.push("説明：" + data.dest + "<br>");
+	if (data.img)
+		s.push("<img src=" + data.img + ">");
 	if (data.coverage)
 		s.push("使用可能エリア: " + data.coverage + "<br>");
 	if (data.hours)
@@ -376,8 +378,10 @@ var makeMarker = function(map, pos, data) {
 	var opb = [ "A", "ff3300" ];
 	var op = opb;
 	var icon = "icon/icon_info.png"; // icons[data.type].icon
-	if (data.img)
-		icon = data.img;
+	if (data.img) {
+		icon = "icon/icon_info2.png";
+//		icon = data.img;
+	}
 	return new google.maps.Marker({
 		position: pos,
 		map: map,
