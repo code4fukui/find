@@ -227,7 +227,7 @@ http://schema.org/telephone	0778-65-37777
 	var q = `
 		prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 		prefix ic: <https://imi.go.jp/ns/core/rdf#>
-		select ?uri ?type ?name ?img ?des ?startt ?endt ?dest ?lat ?lng { graph ?g {
+		select ?uri ?type ?name ?des ?startt ?endt ?dest ?lat ?lng {
 			?uri ic:種別 ?type.
 			?uri ic:名称 [ ic:表記 ?name ].
 			?uri ic:利用可能時間 ?t.
@@ -237,7 +237,7 @@ http://schema.org/telephone	0778-65-37777
 			optional { ?t ic:説明 ?dest. }
 			?uri ic:地理座標/ic:緯度 ?lat.
 			?uri ic:地理座標/ic:経度 ?lng.
-		}}
+		}
 		`;
 //	q = q.replace(/%TIME%/g, time);
 	
