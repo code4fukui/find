@@ -3,14 +3,14 @@
 <html>
 <head>
 <meta charset='utf-8'/>
-<title>findopened　- 開いてるところを探す - opendata.cc</title>
+<title>findramen　- ラーメンを探す - opendata.cc</title>
 <meta property="og:image" content="https://codeforfukui.github.io/findbusstop/ss.jpg">
 <link rel="apple-touch-icon" href="https://codeforfukui.github.io/findbusstop/img/icon_busstop.png"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=medium-dpi">
 <meta name="format-detection" content="telephone=no">
 <script src="lib/fukuno.js"></script>
-<script src="lib/gmap.js"></script>
-<xscript src="lib/gmap_local.js"></script>
+<xscript src="lib/gmap.js"></script>
+<script src="lib/gmap_local.js"></script>
 <script>"use strict";
 
 var DEFAULT_ORG;
@@ -18,6 +18,7 @@ var DEFAULT_ORG;
 var watchid;
 var map;
 var supportgps = typeof navigator.geolocation != 'undefined';
+supportgps = false;
 
 var getLL = function(lat, lng) {
 	return new google.maps.LatLng(lat, lng);
@@ -93,13 +94,14 @@ var init = function() {
 //	DEFAULT_ORG = new google.maps.LatLng(40.392834, -3.723986); // madrid
 //	DEFAULT_ORG = new google.maps.LatLng(35.943352, 136.188597); // sabae st.
 //	DEFAULT_ORG = new google.maps.LatLng(34.834509, 138.177419); // shimada city
-	DEFAULT_ORG = new google.maps.LatLng(35.691180, 139.701038); // shinjuku st. east
+//	DEFAULT_ORG = new google.maps.LatLng(35.691180, 139.701038); // shinjuku st. east
+	DEFAULT_ORG = new google.maps.LatLng(35.011640, 135.768058); // kyoto city hall
 			
 
 	
 	map = new google.maps.Map(get("map"), {
 		center: new google.maps.LatLng(36.208823, 138.251953),
-		zoom: 5,
+		zoom: 3,
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 //		mapTypeId: google.maps.MapTypeId.HYBRID
 	});
@@ -221,23 +223,23 @@ http://www.w3.org/2003/01/geo/wgs84_pos#long	136.274166
 http://www.w3.org/2003/01/geo/wgs84_pos#lat	35.951726
 http://schema.org/telephone	0778-65-37777
 	*/
+//			?uri ic:種別 "麺専門店"@ja.
 	var q = `
 		prefix xsd: <http://www.w3.org/2001/XMLSchema#>
-		prefix ic: <http://imi.go.jp/ns/core/rdf#>
-		select ?uri ?name ?img ?startt ?endt ?dest ?lat ?lng {
+		prefix ic: <https://imi.go.jp/ns/core/rdf#>
+		select ?uri ?type ?name ?img ?des ?startt ?endt ?dest ?lat ?lng { graph ?g {
+			?uri ic:種別 ?type.
 			?uri ic:名称 [ ic:表記 ?name ].
 			?uri ic:利用可能時間 ?t.
+			?uri ic:説明 ?des.
 			?t ic:開始時間 ?startt.
-			filter(?startt <= "%TIME%"^^xsd:time)
 			?t ic:終了時間 ?endt.
-			filter(?endt >= "%TIME%"^^xsd:time)
 			optional { ?t ic:説明 ?dest. }
-			optional { ?uri ic:画像 ?img. }
 			?uri ic:地理座標/ic:緯度 ?lat.
 			?uri ic:地理座標/ic:経度 ?lng.
-		}
+		}}
 		`;
-	q = q.replace(/%TIME%/g, time);
+//	q = q.replace(/%TIME%/g, time);
 	
 		//		"filter(?lat < " + latmax + " && ?lat > " + latmin + " && ?lng < " + lngmax + " && ?lng > " + lngmin + ")\n" +
 //alert(lat + " " + lng);
@@ -247,7 +249,8 @@ http://schema.org/telephone	0778-65-37777
 //		dump(data);
 		var items = data.results.bindings;
 //		alert(items.length);
-		count.textContent = time + "現在、開いているところ：" + items.length + "箇所";
+//		count.textContent = time + "現在、開いているところ：" + items.length + "箇所";
+		count.textContent = "全" + items.length + "箇所";
 		
 		bounds = new google.maps.LatLngBounds();
 		for (var i = 0; i < items.length; i++) {
@@ -352,13 +355,14 @@ var getContent = function(data) {
 	var s = [];
 	s.push("<div id='data'>");
 	
-//	s.push("<div>" + trans(icons[data.type].name) + "</div>");
+//	s.push("<div>" + data.type + "</div>");
 	s.push("<div id='title'>" + getName(data) + "</div>");
-//	s.push("<a href=" + data.uri + ">詳しい情報へ</a><br>");
-	s.push("開始時間：" + data.startt + "<br>");
-	s.push("終了時間：" + data.endt + "<br>");
+	if (data.des)
+		s.push("説明：" + data.des + "<br>");
+	s.push("営業時間：" + data.startt + " - " + data.endt + " ");
 	if (data.dest)
-		s.push("説明：" + data.dest + "<br>");
+		s.push("（" + data.dest + "）");
+	s.push("<br>");
 	if (data.img)
 		s.push("<img src=" + data.img + ">");
 	if (data.coverage)
@@ -370,14 +374,17 @@ var getContent = function(data) {
 //	s.push("[<a href='" + data.seealso + "' target=_blank>seeAlso</a>] [<a href=" + searchImage(getName(data)) + " target=_blank>img search</a>]</br>");
 /*	s.push(data.address + "<br>"); */
 	s.push("MAP <a href='" + mapurl + "' target=_blank>" + pos.lat() + "," + pos.lng() + "</a><br>");
-//	s.push("DATA <a href='" + data.url + "' target=_blank>" + data.url + "</a><br>");
+	s.push("DATA <a href='" + data.uri + "' target=_blank>" + data.uri + "</a><br>");
+	s.push("<div id=img></div>");
 	s.push("</div>");
+	
 	return s.join('');
 };
 var makeMarker = function(map, pos, data) {
 	var opb = [ "A", "ff3300" ];
 	var op = opb;
-	var icon = "icon/icon_info.png"; // icons[data.type].icon
+//	var icon = "icon/icon_info.png"; // icons[data.type].icon
+	var icon = "illustya/food_ramen_iekei_icon.png";
 	if (data.img) {
 		icon = "icon/icon_info2.png";
 //		icon = data.img;
@@ -616,12 +623,12 @@ body {
 <button class='nbtn' id='btnp'>&lt;&lt;</button>
 <button class='nbtn' id='btnf'>nearest</button>
 <button class='nbtn' id='btnn'>&gt;&gt;</button>
-<div id="count"></div>
 <div id="info"></div>
 </div>
 
 <div id="route"></div>
 
+<div id="count"></div>
 
 </div>
 
