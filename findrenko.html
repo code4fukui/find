@@ -3,546 +3,155 @@
 <html>
 <head>
 <meta charset='utf-8'/>
-<title>オープンデータ選挙カー連呼スポット探しアプリ</title>
-<meta property="og:image" content="http://fukuno.jig.jp/app/find/findrenko.jpg">
-<link rel="apple-touch-icon" href="http://fukuno.jig.jp/app/find/findrenko.jpg"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-<meta name="format-detection" content="telephone=no">
-<script src="lib/fukuno.js"></script>
-<script src="lib/gmap.js"></script>
-<script>"use strict";
+<title>オープンデータ 選挙カー連呼スポット探しアプリ</title>
+<link rel="apple-touch-icon" href="findrenko.jpg"/>
+<meta property="og:image" content="findrenko.jpg"/>
+<meta name="viewport" content="width=device-width"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+<script src="https://code4fukui.github.io/egmapjs/egmap.js"></script>
+<link rel="stylesheet" href="https://code4fukui.github.io/egmapjs/egmap.css"/>
+<script src="https://fukuno.jig.jp/fukuno.js"></script>
+<script src="https://code4fukui.github.io/egmapjs/sparql.js"></script>
+<script>"use strict"
 
-var DEFAULT_ORG;
-
-var watchid;
-var map;
-var supportgps = typeof navigator.geolocation != 'undefined';
-
-var getLL = function(lat, lng) {
-	return new google.maps.LatLng(lat, lng);
-};
-var showNearest = function() {
-	if (supportgps)
-		getPositionGPS();
-	else
-		setPosition(DEFAULT_ORG, 5);
-};
-
-var TYPE = "http://purl.org/jrrk#CivicPOI";
-var HOW_FAR_DEG_FROM_HEAR = 0.08;
-
-var icons = {
- "http://odp.jig.jp/odp/1.0#PosterPlace": { icon: "icon/poster-mini.png", name: "投票ポスター" },
- "http://odp.jig.jp/odp/1.0#Polls": { icon: "icon/polls.png", name: "投票所" },
- "http://purl.org/jrrk#CivicFacility": { icon: "icon_facility.png", name: "施設" },
-"http://purl.org/jrrk#EmergencyFacility": { icon: "icon/emergency.png", name: "避難所" },
-//http://purl.org/jrrk#temporaryGatheringLocation
- "http://purl.org/jrrk#FarmersMarket": { icon: "icon_tomato.png", name: "農産物直売所" },
-//http://purl.org/jrrk#RoadConstruction
- "http://purl.org/jrrk#AED": { icon: "icon_aed.png", name: "AED設置場所" },
- "http://purl.org/jrrk#PublicToilet": { icon: "icon_toilet.png", name: "公衆トイレ" },
- "http://purl.org/jrrk#Hydrant": { icon: "icon_hydrant.png", name: "消火栓" },
-"http://purl.org/jrrk#CivicPOI": { icon: "icon/icon_star.png", name: "観光地" },
-//http://purl.org/jrrk#RequiringAssistanceAuthorizedUsersFacilityDisaster
- "http://purl.org/jrrk#MedicalInstitute": { icon: "icon_clinic.png", name: "病院" },
-};
-
-/*
-translated by
-http://webtranslation.paralink.com/translator/default.asp
-*/
-var CAP = {
-	ja: [ "最短", "避難所を探す" ],
-	en: [ "nearest", "find a refuge" ],
-	zh: [ "最近", "找到避难所" ],
-	ko: [ "가장 가까운", "피난처를 찾아" ],
-	de: [ "nächste", "finden Sie einen Unterschlupf" ],
-	ca: [ "més proper", "trobar un refugi" ],
-	pt: [ "quase", "finden Sie einen Unterschlupf" ],
-	tl: [ "kalapitan", "makahanap ng isang magkubli" ],
-	fa: [ "نزديكترين", "نزديكترين" ]
-};
-var lang = function(s, loadapi) {
-//debug(s);
-	var v = CAP[s];
-	if (v == null)
-		v = CAP["en"];
-//	get("btnf").textContent = v[0];
-//	document.title = v[1];
-	
-	if (loadapi !== false) {
-		document.location.hash = "#" + s;
-		document.location.reload();
-	}
-};
 window.onload = function() {
-	init();
-};
-var init = function() {
-	if (google == null || google.maps == null || google.maps.LatLng == null) {
-		setTimeout(init, 100);
-		return;
-	}
+	var map = initMap('mapid')
+	map.setZoom(16)
+	const defaultpos = [ 35.943560,136.188917 ]
+	map.panTo(defaultpos) // 鯖江駅
+//	map.panTo([ 35.929991,136.186429 ]) // サンドーム福井
 
-	lang(getLanguage2(), false);
+	var firstflg = true
 
-	DEFAULT_ORG = new google.maps.LatLng(35.943187,136.188701); // 鯖江駅
-//	DEFAULT_ORG = new google.maps.LatLng(35.903304,136.170836); // 武生駅
-//	DEFAULT_ORG = new google.maps.LatLng(35.012564,135.767959); // 京都
-//	DEFAULT_ORG = new google.maps.LatLng(35.173887,138.906723); // 裾野市
-//	DEFAULT_ORG = new google.maps.LatLng(34.681501, 135.817691); // 奈良市
-//	DEFAULT_ORG = new google.maps.LatLng(35.628578, 139.739249); // 品川駅
-	
-	map = new google.maps.Map(get("map"), {
-		center: new google.maps.LatLng(36.208823, 138.251953),
-		zoom: 5,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
-//		mapTypeId: google.maps.MapTypeId.HYBRID
-	});
-	
-	
-	get('btngps').onclick = function() {
-		if (supportgps) {
-			if (!watchid) {
-				getPositionGPS();
-			} else {
-				stopPosition();
-			}
-		} else {
-			alert("GPS設定をONにしてください");
+	var current = map.addIcon(0, 0, "現在地", "icon_star.png", 32, 32)
+	navigator.geolocation.watchPosition(function(gpos) {
+		// 位置情報取得に成功したとき
+		const pos = [ gpos.coords.latitude, gpos.coords.longitude ]
+		current.setLatLng(pos)
+		map.panTo(pos)
+
+		if (firstflg) {
+			firstflg = false
+			showIcons()
 		}
-	};
-	
-	markers = [];
-	bounds = new google.maps.LatLngBounds();
-	
-	showNearest();
-};
-var markers;
-var bounds;
-var makeMarkerItem = function(d, icon) {
-	var lat = d.latitude || d.lat;
-	var lng = d.longitude || d.lng;
-	var ll = new google.maps.LatLng(lat, lng);
-	d.pos = ll;
-	bounds.extend(ll);
-	var marker = makeMarker(map, ll, d, icon);
-	markers.push(marker);
-	marker.data = d;
-	google.maps.event.addListener(marker, "click", function(e) {
-		openInfo(this);
-	});
-	
-	/*
-	var div = create('div');
-	div.textContent = d.name;
-	div.data = d;
-	div.marker = marker;
-	div.onclick = function(e) {
-//		selected(e.srcElement);
-		var d = this.data;
-		var lat = d.latitude || d.lat;
-		var lng = d.longitude || d.lng;
-		map.setCenter(new google.maps.LatLng(lat, lng));
-		map.setZoom(17);
-		openInfo(e.srcElement.marker);
-	};
-	get('list').appendChild(div);
-	*/
-};
-var clearMarkers = function() {
-	for (var i = 0; i < markers.length; i++) {
-		markers[i].circle.setMap(null);
-		markers[i].setMap(null);
-	}
-};
-var first = true;
+	}, function() {
+		// 位置情報取得に失敗したとき
+		const pos = defaultpos
+		current.setLatLng(pos)
+		map.panTo(pos)
+		showIcons()
+	})
 
-var isSchool = function(d) {
-	var s = d.type;
-	if (s.indexOf("学校") >= 0)
-		return true;
-	if (s.indexOf("幼稚園") >= 0)
-		return true;
-	if (s.indexOf("保育園") >= 0)
-		return true;
-	return false;
-};
-var loadPOI = function(callback, ll, funcnext) {
-//	currentpos = ll = getLL(35.903508,136.168782);
-
-	clearMarkers();
-	
-	// google.maps.event.addListener(map, "idle", function() {
-	/*
-	var b = map.getBounds();
-	if (!b)
-		return;
-	var latmin = b.getNorthEast().lat();
-	var lngmin = b.getNorthEast().lng();
-	var latmax = b.getSouthWest().lat();
-	var lngmax = b.getSouthWest().lng();
-	alert(latmin + " " + lngmin + " " + latmax + " " + lngmax);
-	*/
-	var lat = ll.lat();
-	var lng = ll.lng();
-	
-//	return;
-	var dll = HOW_FAR_DEG_FROM_HEAR;
-	
-	var f = function(data) {
-		//		dump(data);
-		var items = data.results.bindings;
-		
-		if (items.length == 0 && first) {
-			first = false;
-			alert("付近にデータがないため、デモとして大阪市付近を表示します");
-			stopPosition();
-			var lat = 34.702627;
-			var lng = 135.496208;
-			map.setCenter(getLL(lat, lng));
-			map.setZoom(15);
-			queryRenko(lat, lng, dll, f);
-			return;
-		}
-		
-		bounds = new google.maps.LatLngBounds();
-		for (var i = 0; i < items.length; i++) {
-			var it = items[i];
-			var d = {
-				uri: it.uri.value,
-				type: it.type.value,
-				name: it.name.value,
-				lat: it.lat.value,
-				lng: it.lng.value
-			};
-			callback(d);
-		}
-		if (data.length > 0)
-			map.fitBounds(bounds);
-		
-		funcnext();
-	};
-	queryRenko(lat, lng, dll, f);
-//	window.getdata = func;
-//	jsonp("testjson2.js");
-};
-var ENDPOINT_ODP = "https://sparql.odp.jig.jp/api/v1/sparql";
-var ENDPOINT_OSAKA = "https://data.city.osaka.lg.jp/sparql";
-var queryRenko = function(lat, lng, dll, callback) {
-	var endpoint = [
-		ENDPOINT_ODP,
-		ENDPOINT_OSAKA,
-	];
-	var regptn = [
-	[ "学校|医療機関|病院|保育園|幼稚園" ],
-	[ "学校", "病院" ]
-	];
-	var n = 0;
-	var res = null;
-	for (var i = 0; i < endpoint.length; i++) {
-		for (var j = 0; j < regptn.length; j++) {
-			n++;
-			queryRenkoInner(endpoint[i], lat, lng, regptn[i][j], dll, function(data) {
-					//				dump(data);
-//				console.log(n + " "+ data.results.bindings.length);
-				if (!res) {
-					res = data;
-				} else {
-					for (var i = 0; i < data.results.bindings.length; i++) {
-						res.results.bindings.push(data.results.bindings[i]);
-					}
-				}
-				n--;
-				if (n == 0)
-					callback(res);
-			});
+	const shows = [
+		[ "icon_clinic.png", "http://purl.org/jrrk#MedicalInstitute", '' ],
+	//	[ "icon_school.png", "http://purl.org/jrrk#EmergencyFacility", 'filter(regex(?name,"学校|病院|診療所"))' ]
+		[ "icon_school.png", "http://purl.org/jrrk#EmergencyFacility", 'filter(regex(?name,"学校"))' ]
+	]
+	const showIcons = function() {
+		for (let i = 0; i < shows.length; i++) {
+			const d = shows[i]
+			showIcons2(d[0], d[1], d[2])
 		}
 	}
-};
+	const putIcon = function(icon, name, lat, lng) {
+		const circle = L.circle([ lat, lng], 300, {
+		    //color: '#00dd00',
+		    weight: 0,
+		    opacity: 0.3,
+		    fillColor: '#00dd00',
+		    fillOpacity: 0.3
+		}).addTo(map);
+		map.addIcon(lat, lng, name, icon, 32, 32)
+	}
+	putIcon("icon_school.png", "福井高専", 35.936564, 136.172243)
 
-var queryRenkoInner = function(endpoint, lat, lng, regptn, dll, callback) {
-	var latmin = lat - dll;
-	var latmax = lat + dll;
-	var lngmin = lng - dll;
-	var lngmax = lng + dll;
-	var q =
-	"PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
-	"select ?uri ?name ?type ?lat ?lng {\n" + 
-	"?uri <http://imi.ipa.go.jp/ns/core/rdf#地理座標> ?s2.\n" +
-	"?s2 <http://imi.ipa.go.jp/ns/core/rdf#緯度> ?lat.\n" +
-	"?s2 <http://imi.ipa.go.jp/ns/core/rdf#経度> ?lng.\n" +
-	"?uri <http://www.w3.org/2000/01/rdf-schema#label> ?name.\n" +
-	"?uri <http://imi.ipa.go.jp/ns/core/rdf#種別> ?type.\n" +
-	//		"filter(xsd:long(?lat) < " + latmax + " && ?lat > " + latmin + " && ?lng < " + lngmax + " && ?lng > " + lngmin + ")" +
-	" filter(xsd:float(?lat) < " + latmax + " && xsd:float(?lat) > " + latmin + " && xsd:float(?lng) < " + lngmax + " && xsd:float(?lng) > " + lngmin + ")" + // osakaに必要
-	"filter(regex(?type,\"" + regptn + "\"))\n" + 
-	"}";
-	
-	//alert(lat + " " + lng);
-	querySPARQL(endpoint, q, callback);
-};
-var querySPARQL = function(baseurl, q, callback) {
-	//	var baseurl = "http://sparql.odp.jig.jp/data/sparql";
-	var url = baseurl + "?query=" + encodeURIComponent(q) + "&output=json";
-	url += "&callback=" + getCallbackMethod(callback);
-	jsonp(url);
-};
-	
-var queryItemSPARQL = function(uri, callback) {
-//	alert(uri);
-	if (uri.startsWith("http://data.city.osaka.lg.jp/")) {
-		querySPARQL(ENDPOINT_OSAKA, "select * { <" + uri + "> ?p ?o }", callback);
-	} else {
-		querySPARQL(ENDPOINT_ODP, "select * { <" + uri + "> ?p ?o }", callback);
-	}
-};
-var getDistance = function(lat1, lng1, lat2, lng2) {
-	var dlat = (lat2 - lat1) * Math.PI / 180;
-	var dlng = (lng2 - lng1) * Math.PI / 180;
-	var a = Math.sin(dlat / 2) * Math.sin(dlat / 2)
-		+ Math.cos(lat1 * Math.PI / 180)
-		* Math.cos(lat2 * Math.PI / 180)
-		* Math.sin(dlng / 2) * Math.sin(dlng / 2);
-	return 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 6371; // 6371 = R of the Earth in km
-};
-var jptel = function(tel) {
-	if (tel.startsWith("+81-")) {
-		return "0" + tel.substring(4);
-	}
-	return tel;
-};
-var getName = function(data) {
-	var lang = getLanguage2();
-	var s = data.name;
-	if (lang != "ja" && lang != "zh" && data.nameen != null && data.nameen != "null")
-		s = data.nameen;
-	var n = s.lastIndexOf("@@");
-	if (n > 0)
-		s = s.substring(0, n);
-	return s;
-};
-var getContent = function(data) {
-	var pos = data.pos;
-	var mapurl = "http://maps.google.co.jp/maps?ll=" + pos.lat() + "," + pos.lng();
-	var s = [];
-	s.push("<div id='data'>");
-	
-//	s.push("<div>" + icons[data.type].name + "</div>");
-	s.push("<div id='title'>" + getName(data) + "</div>");
-	if (data.img) {
-		s.push("<img src=" + data.img + " width=200px><br>");
-	}
-	if (data.desc) {
-		s.push(data.desc + "<br>");
-	}
-	if (data.notes) {
-		s.push("（" + data.notes + "）<br>");
-	}
-	if (data.zip) {
-		s.push("〒" + data.zip + "<br>");
-	}
-	if (data.address) {
-		s.push(data.address + "<br>");
-	}
-	s.push("MAP <a href='" + mapurl + "' target=_blank>" + pos.lat() + "," + pos.lng() + "</a><br>");
-	s.push("<a href=" + getImageSearchLink(getName(data)) + " target=_blank>画像検索</a> <a href=" + getSearchLink(getName(data)) + " target=_blank>Web検索</a><br>");
-//	s.push("DATA <a href='" + data.url + "' target=_blank>" + data.url + "</a><br>");
-	s.push("</div>");
-	return s.join('');
-};
-var getSearchLink = function(s) {
-	return "http://search.yahoo.co.jp/search?p=" + encodeURIComponent(s);
-};
-var getImageSearchLink = function(s) {
-	return "http://image.search.yahoo.co.jp/search?p=" + encodeURIComponent(s);
-};
-var makeMarker = function(map, pos, data, icon) {
-	var opb = [ "A", "ff3300" ];
-	var op = opb;
-	var ratio = .5;
-	var m = new google.maps.Marker({
-		position: pos,
-		map: map,
-		draggable: false,
-//		animation: google.maps.Animation.DROP,
-//		icon: 'http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=' + op[0] + '|' + op[1] + '|000000'
-//		icon: 'icon-heart32x32.png' // アイコン下中央がデフォルトっぽい
-		icon: new google.maps.MarkerImage(
-			//'icon/icon-exit2.png',
-//			icons[data.type].icon,
-			icon,
-			new google.maps.Size(128 * ratio, 128 * ratio), // size
-			new google.maps.Point(0, 0), // org
-			new google.maps.Point(24 * ratio, 24 * ratio), // anchor
-			new google.maps.Size(48 * ratio, 48 * ratio) // scaledSie
-		)
-/*
-		icon: new google.maps.MarkerImage(
-			'icon-heart.png',
-			new google.maps.Size(32, 32),
-			new google.maps.Point(0, 0),
-			new google.maps.Point(16, 16)
-		)
-*/
-	});
-	
-	var radius = 300;
-	m.circle = new google.maps.Circle({
-		map: map,
-		center: pos,
-		fillColor: "#33ff33",
-		fillOpacity: .2,
-		strokeWeight: 0,
-//		strokeColor: "#3333ff",
-//		strokeOpacity: 1,
-//		strokeWeight: 2,
-		radius: radius
-	});
-	
-	return m;
-};
-var openInfo = function(marker) {
-	if (marker.data.detail) {
-		openInfo2(marker);
-	} else {
-		var data = marker.data;
-		queryItemSPARQL(data.uri, function(detail) {
-	//		dump(detail);
-			var items = detail.results.bindings;
+	const showIcons2 = function(icon, type, filter) {
+		// SPARQLクエリー
+		var query = `
+			prefix ic: <http://imi.go.jp/ns/core/rdf#>
+			prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+			prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+			prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+			prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+
+			select ?uri ?name ?lat ?lng {
+				?uri rdf:type <$TYPE>.
+				?uri rdfs:label ?name.
+				?uri geo:lat ?lat.
+				?uri geo:long ?lng.
+				filter(
+					xsd:float(?lat) < $LAT_MAX && xsd:float(?lng) > $LNG_MIN &&
+					xsd:float(?lat) > $LAT_MIN && xsd:float(?lng) < $LNG_MAX
+				)
+				$FILTER
+			} limit 1000
+		`
+		var p = map.getCenter()
+		const dl = .05 // .01 // 取得する広さ 大きいほど広く取得
+		query = query.replace("$LAT_MAX", p.lat + dl)
+		query = query.replace("$LAT_MIN", p.lat - dl)
+		query = query.replace("$LNG_MAX", p.lng + dl)
+		query = query.replace("$LNG_MIN", p.lng - dl)
+		query = query.replace("$TYPE", type)
+		query = query.replace("$FILTER", filter)
+		querySPARQL(query, function(data) {
+			var items = data.results.bindings
 			for (var i = 0; i < items.length; i++) {
-				var p = items[i].p.value;
-				var o = items[i].o.value;
-				if (p == "http://schema.org/description") {
-					data.desc = o;
-				} else if (p == "http://purl.org/jrrk#address") {
-					data.address = o;
-				} else if (p == "http://schema.org/postalCode") {
-					data.zip = o;
-				} else if (p == "http://purl.org/jrrk#notes") {
-					data.notes = o;
-				} else if (p == "http://schema.org/image") {
-					data.img = o;
+				var item = items[i]
+				var lat = item.lat.value
+				var lng = item.lng.value
+				var name = item.name.value
+
+				const onclick = function(e) {
+					var ll = current.getLatLng()
+					var dis = calcDistance(ll.lat, ll.lng, e.latlng.lat, e.latlng.lng)
+					if (dis > 0.002 * 2) {
+						alert("もうちょっと近付こう！")
+						return
+					}
+					if (!challenge(e)) {
+						alert("残念!")
+						return
+					}
+					alert("おめでとう！")
+					map.removeLayer(e.target)
+					map.addIcon(e.latlng.lat, e.latlng.lng, "checked!", "icon/firehydrant.png", 48, 48)
 				}
+				putIcon(icon, name, lat, lng)
+				//map.addIcon(lat, lng, name)
 			}
-			openInfo2(marker);
-		});
+		})
 	}
-};
-var openInfo2 = function(marker) {
-	get('info').innerHTML = getContent(marker.data);
-	return; // disable InfoWindow
-	
-	if (map.info != null) {
-		map.info.close();
-		if (map.info.marker == marker) {
-			map.info = null;
-			return;
-		}
-	}
-	map.info = new google.maps.InfoWindow({
-		content: getContent(marker.data),
-//		position: marker.pos,
-		pixelOffset: new google.maps.Size(-20, 0)
-	});
-	google.maps.event.addListener(map.info, "closeclick", function() {
-		map.info = null;
-	});
-	map.info.marker = marker;
-	map.info.open(map, marker);
-//	map.info.open(map);
-};
-var currentpos;
-var circle = null;
-var setPosition = function(ll, accuracy) {
-	currentpos = ll;
-	if (circle != null) {
-		circle.setCenter(ll);
-		map.setCenter(ll);
-		return;
-	}
-	map.setCenter(ll);
-	map.setZoom(19);
-	
-	circle = new google.maps.Circle({
-		map: map,
-		center: ll,
-		fillColor: "#3333ff",
-		fillOpacity: .2,
-		strokeWeight: 0,
-//		strokeColor: "#3333ff",
-//		strokeOpacity: 1,
-//		strokeWeight: 2,
-		radius: accuracy
-	});
-	
-	loadPOI(function(d) {
-		if (isSchool(d)) {
-			makeMarkerItem(d, "icon/icon_school.png");
-		} else {
-			makeMarkerItem(d, "icon/icon_clinic.png");
-		}
-	}, ll, function() {
-//		findNear();
-	});
-}
-var stopPosition = function() {
-	if (watchid) {
-		navigator.geolocation.clearWatch(watchid);
-		watchid = null;
-	}
-	if (circle) {
-		circle.setMap(null);
-		circle = null;
-	}
-	get("btngps").textContent = "GPS OFF";
-}
-var getPositionGPS = function() {
-	if (watchid != null) {
-		navigator.geolocation.clearWatch(watchid);
-	}
-	get("btngps").textContent = "GPS ON";
-	watchid = navigator.geolocation.watchPosition(function(p) {
-//		navigator.geolocation.clearWatch(watchid);
-//		watchid = null;
-		var lat = p.coords.latitude;
-		var lng = p.coords.longitude;
-		var ll = getLL(lat, lng);
-		setPosition(ll, p.coords.accuracy);
-	}, function(e) {
-		setPosition(DEFAULT_ORG, 5);
-		alert("現在位置を取得できませんでした。GPSなどがONになっているかご確認ください。\ncheck GPS settings");
-		get("btngps").textContent = "GPS OFF";
-	}, {
-		maximumAge: 5000,
-		enableHighAccuracy: 1
-	});
-};
 
-var parseInt2 = function(n) {
-	var n = parseInt(n);
-	if (isNaN(n))
-		return "-";
-	return n;
-};
-
-var getLanguage2 = function() {
-	var lang = getLanguage();
-	var hash = document.location.hash;
-	if (hash.length > 2) {
-		lang = hash.substring(1);
-	}
-	return lang;
-};
-loadLocalAPI();
+}
+const challenge = function(e) {
+	var n = rnd(9) + 1
+	var m = rnd(9) + 1
+	var a = prompt(n + " + " + m + "?")
+	return parseInt(a) == n + m
+}
+const calcDistance = function(lat1, lng1, lat2, lng2) {
+	const d1 = parseFloat(lat1) - parseFloat(lat2)
+	const d2 = parseFloat(lng1) - parseFloat(lng2)
+	return Math.sqrt(d1 * d1 + d2 * d2)
+}
 
 </script>
 <style>
+
+#mapid { height: 60vh; }
+
 body {
 	margin: 0px;
 	text-align: center;
 	box-sizing: border-box; /* width include border */
 	-webkit-text-size-adjust: none; /* for iPhone */
+	font-family: sans-serif;
+}
+h1 {
+	padding: 0.3em;
+	margin: 0;
 }
 #map {
 	width: 100%;
@@ -607,18 +216,11 @@ body {
 	font-size: 90%;
 	background: #eee;
 }
-</style>
-</head>
-<body>
 
-<div id='main'>
+</style></head><body>
 
-<div id='navi'>
-<div id='map'></div>
-<button class='nbtn' id='btngps'>GPS OFF</button>
-<div id="info"></div>
-</div>
-
+<div id="mapid"></div>
+<h1>選挙カー連呼スポット探しアプリ</h1>
 <div id="text">
 （連呼行為の禁止）<br>
 第百四十条の二 　何人も、選挙運動のため、連呼行為をすることができない。ただし、演説会場及び街頭演説（演説を含む。）の場所においてする場合並びに午前八時から午後八時までの間に限り、次条の規定により選挙運動のために使用される自動車又は船舶の上においてする場合は、この限りでない。<br>
@@ -631,8 +233,8 @@ body {
 </div>
 
 <div class="src">
-APP: CC BY <a href=http://fukuno.jig.jp/1456 target=_blank>オープンデータ選挙カー連呼スポット探しアプリ - 福野泰介の一日一創</a>(<a href=findrenko.html>odpのみ版</a>)<br>
-DATA: CC BY <a href=https://sparql.odp.jig.jp/ target=_blank>odp SPARQL Endpoint</a>, <a href=http://data.city.osaka.lg.jp>大阪市オープンデータポータルサイト</a><br>
+APP: CC BY <a href=http://fukuno.jig.jp/1456 target=_blank>オープンデータ選挙カー連呼スポット探しアプリ - 福野泰介の一日一創</a><br>
+DATA: CC BY <a href=https://opendata.cc/ target=_blank>opendata.cc SPARQL Endpoint</a><br>
 </div>
 
 <!--
@@ -652,3 +254,10 @@ DATA: CC BY <a href=https://sparql.odp.jig.jp/ target=_blank>odp SPARQL Endpoint
 
 </body>
 </html>
+
+
+
+<img id=qrcode><script>addEventListener("load", () => qrcode.src = "https://chart.apis.google.com/chart?chs=140x140&cht=qr&chl=" + encodeURIComponent(document.location))</script><br>
+<a href=https://fukuno.jig.jp/2393>簡単地図アプリ egmapjs チュートリアル</a>
+
+</body></html>
