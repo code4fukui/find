@@ -44,9 +44,9 @@ window.onload = function() {
 	})
 
 	const shows = [
-		[ "icon_clinic.png", "http://purl.org/jrrk#MedicalInstitute", '' ],
-	//	[ "icon_school.png", "http://purl.org/jrrk#EmergencyFacility", 'filter(regex(?name,"学校|病院|診療所"))' ]
-		[ "icon_school.png", "http://purl.org/jrrk#EmergencyFacility", 'filter(regex(?name,"学校"))' ]
+		[ "icon/icon_clinic.png", "http://purl.org/jrrk#MedicalInstitute", '' ],
+	//	[ "icon/icon_school.png", "http://purl.org/jrrk#EmergencyFacility", 'filter(regex(?name,"学校|病院|診療所"))' ]
+		[ "icon/icon_school.png", "http://purl.org/jrrk#EmergencyFacility", 'filter(regex(?name,"学校"))' ]
 	]
 	const showIcons = function() {
 		for (let i = 0; i < shows.length; i++) {
@@ -64,7 +64,7 @@ window.onload = function() {
 		}).addTo(map);
 		map.addIcon(lat, lng, name, icon, 32, 32)
 	}
-	putIcon("icon_school.png", "福井高専", 35.936564, 136.172243)
+	putIcon("icon/icon_school.png", "福井高専", 35.936564, 136.172243)
 
 	const showIcons2 = function(icon, type, filter) {
 		// SPARQLクエリー
