@@ -1,4 +1,7 @@
 # find
+
+> 日本語のREADMEはこちらです: [README.ja.md](README.ja.md)
+
 Open data mapping application to locate various facilities.
 
 ## Demo
