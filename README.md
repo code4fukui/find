@@ -4,9 +4,6 @@
 
 Open data mapping application to locate various facilities.
 
-## Demo
-No live demo available.
-
 ## Features
 - Locate emergency facilities, polling stations, public toilets, and more using OpenData.
 - Display locations on a map with clickable markers.
